@@ -1,5 +1,5 @@
 # ── Core Framework ─────────────────────────────────────────────────────────
-Django>=5.0                      # 5.2.15 is installed; satisfies >=5.0
+Django>=5.0,<6.0                 # Tested on 5.2.x; <6.0 prevents resolving to Django 6 on Render
 djangorestframework>=3.14.0      # 3.16.1 is installed
 
 # ── Database ────────────────────────────────────────────────────────────────
