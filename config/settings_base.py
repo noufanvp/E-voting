@@ -2,14 +2,68 @@ import os
 from pathlib import Path
 
 import dj_database_url
+from dotenv import load_dotenv
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "dev-insecure-change-me")
-DEBUG = os.getenv("DJANGO_DEBUG", "0") == "1"
-ALLOWED_HOSTS = [host.strip() for host in os.getenv("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost").split(",") if host.strip()]
-CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("DJANGO_CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
+# Load .env file for local development.
+# On Render, this is a no-op — Render injects env vars directly into the
+# process environment; no .env file is present on the build container.
+load_dotenv(BASE_DIR / ".env")
+
+# ---------------------------------------------------------------------------
+# Security — reads Render-injected env vars with safe dev fallbacks
+# ---------------------------------------------------------------------------
+
+# Render injects SECRET_KEY via render.yaml generateValue.
+# Local .env files use DJANGO_SECRET_KEY (legacy name).
+# Priority: SECRET_KEY → DJANGO_SECRET_KEY → dev placeholder (DEBUG only).
+DEBUG = os.environ.get("DEBUG", "False") == "True"
+
+_dev_placeholder = "dev-insecure-placeholder-do-not-use-in-production" if DEBUG else None
+SECRET_KEY = (
+    os.environ.get("SECRET_KEY")
+    or os.environ.get("DJANGO_SECRET_KEY")
+    or _dev_placeholder
+)
+if not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY (or DJANGO_SECRET_KEY) environment variable is not set. "
+        "Add SECRET_KEY to your Render service environment variables."
+    )
+
+# ---------------------------------------------------------------------------
+# Hosts — always allows localhost + any Render subdomain automatically
+# ---------------------------------------------------------------------------
+
+ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+
+# Render injects RENDER_EXTERNAL_HOSTNAME (e.g. school-evoting.onrender.com).
+# Appending it covers the exact service hostname without wildcards.
+_render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+if _render_host:
+    ALLOWED_HOSTS.append(_render_host)
+
+# Allow any extra hosts supplied via the legacy DJANGO_ALLOWED_HOSTS var
+# (used in local .env / VPS deploys).
+_extra_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "")
+ALLOWED_HOSTS += [h.strip() for h in _extra_hosts.split(",") if h.strip()]
+
+# ---------------------------------------------------------------------------
+# CSRF — auto-builds the https Render origin; also reads legacy var
+# ---------------------------------------------------------------------------
+
+CSRF_TRUSTED_ORIGINS = []
+if _render_host:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{_render_host}")
+
+_extra_origins = os.environ.get("DJANGO_CSRF_TRUSTED_ORIGINS", "")
+CSRF_TRUSTED_ORIGINS += [o.strip() for o in _extra_origins.split(",") if o.strip()]
+
+# ---------------------------------------------------------------------------
+# Installed apps
+# ---------------------------------------------------------------------------
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -22,9 +76,13 @@ INSTALLED_APPS = [
     "voting",
 ]
 
+# ---------------------------------------------------------------------------
+# Middleware — WhiteNoise must sit directly below SecurityMiddleware
+# ---------------------------------------------------------------------------
+
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",          # ← static files (Render)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -52,13 +110,23 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+# ---------------------------------------------------------------------------
+# Database — dj_database_url.config() ingests DATABASE_URL automatically.
+# Render injects DATABASE_URL via fromDatabase in render.yaml.
+# Falls back to local SQLite for development.
+# ---------------------------------------------------------------------------
+
 DATABASES = {
-    "default": dj_database_url.parse(
-        os.getenv("DATABASE_URL", f"sqlite:///{BASE_DIR / 'db.sqlite3'}"),
+    "default": dj_database_url.config(
+        default=f"sqlite:///{BASE_DIR / 'db.sqlite3'}",
         conn_max_age=600,
-        ssl_require=os.getenv("DATABASE_SSL_REQUIRE", "0") == "1",
+        conn_health_checks=True,
     )
 }
+
+# ---------------------------------------------------------------------------
+# Auth password validators
+# ---------------------------------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
@@ -67,18 +135,40 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
+# ---------------------------------------------------------------------------
+# Internationalisation
+# ---------------------------------------------------------------------------
+
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = os.getenv("DJANGO_TIME_ZONE", "Asia/Kolkata")
+TIME_ZONE = os.environ.get("DJANGO_TIME_ZONE", "Asia/Kolkata")
 USE_I18N = True
 USE_TZ = True
 
+# ---------------------------------------------------------------------------
+# Static files — STORAGES dict (Django 4.2+ / 5.x canonical API)
+# WhiteNoise CompressedManifestStaticFilesStorage hashes filenames and
+# serves brotli/gzip compressed assets directly from Gunicorn on Render.
+# ---------------------------------------------------------------------------
+
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "staticfiles"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [BASE_DIR / "voting" / "static"]
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
+
+# ---------------------------------------------------------------------------
+# URL / auth shortcuts
+# ---------------------------------------------------------------------------
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "kiosk"
@@ -86,10 +176,18 @@ LOGOUT_REDIRECT_URL = "login"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# ---------------------------------------------------------------------------
+# Security headers — Render terminates TLS and forwards X-Forwarded-Proto
+# ---------------------------------------------------------------------------
+
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 X_FRAME_OPTIONS = "DENY"
+
+# ---------------------------------------------------------------------------
+# Django REST Framework
+# ---------------------------------------------------------------------------
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (

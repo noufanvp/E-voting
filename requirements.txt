@@ -1,7 +1,18 @@
-Django==5.2.15
-djangorestframework==3.16.1
-dj-database-url==3.0.1
-psycopg[binary]==3.2.12
-python-dotenv==1.1.1
-gunicorn==23.0.0
-whitenoise==6.11.0
+# ── Core Framework ─────────────────────────────────────────────────────────
+Django>=5.0                      # 5.2.15 is installed; satisfies >=5.0
+djangorestframework>=3.14.0      # 3.16.1 is installed
+
+# ── Database ────────────────────────────────────────────────────────────────
+# psycopg2-binary is the Render-free-tier-safe driver (pure binary wheel).
+# psycopg (v3) is kept for local dev parity; Render uses psycopg2-binary.
+psycopg2-binary>=2.9.9
+dj-database-url>=2.1.0           # 3.0.1 is installed; conn_health_checks arg available
+
+# ── WSGI Server ────────────────────────────────────────────────────────────
+gunicorn>=21.2.0                  # 23.0.0 is installed
+
+# ── Static Files ───────────────────────────────────────────────────────────
+whitenoise>=6.6.0                 # 6.11.0 is installed
+
+# ── Utilities ──────────────────────────────────────────────────────────────
+python-dotenv>=1.0.0              # 1.1.1 is installed
