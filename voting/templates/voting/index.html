@@ -1,0 +1,133 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="School Student Council Election kiosk." />
+  <meta name="csrf-token" content="{{ csrf_token }}" />
+  <title>E-Voting Kiosk</title>
+  <link rel="stylesheet" href="{% static 'voting/css/style.css' %}" />
+  <style>
+    .operator-bar {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      gap: 12px;
+    }
+
+    .operator-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .btn-start {
+      height: 38px;
+      border: none;
+      border-radius: var(--r-md);
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      cursor: pointer;
+    }
+
+    .btn-start:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .waiting-screen {
+      flex: 1 1 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 24px;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="school-badge">
+      <span class="dot"></span>
+      <span id="school-name">School Name</span>
+    </div>
+    <h1 id="election-title">Student Council Election</h1>
+    <p id="header-subtitle">Supervised Kiosk Voting</p>
+  </header>
+
+  <div class="operator-bar">
+    <div class="operator-meta">
+      Signed in as <strong>{{ request.user.username }}</strong>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button id="btn-start-session" class="btn-start">Start New Voter Session</button>
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn-nav" style="height:38px;">Logout</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="progress-bar-wrap">
+    <div class="progress-info">
+      <span id="progress-text">0 of 0 positions voted</span>
+      <span id="progress-percent">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div id="waiting-screen" class="waiting-screen">
+    Verify student manually, then click <strong style="margin-left:6px;">Start New Voter Session</strong>.
+  </div>
+
+  <div id="voting-content" class="hidden">
+    <main class="main">
+      <div id="voting-container"></div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal">
+      <div class="modal-icon">🗳️</div>
+      <h2>Confirm Ballot</h2>
+      <p>Please verify selections before final submission.</p>
+
+      <div class="modal-votes-summary" id="modal-summary"></div>
+
+      <div class="modal-actions">
+        <button class="btn-cancel" id="btn-close-modal">Go Back</button>
+        <button class="btn-confirm" id="btn-confirm-submit">Submit Anonymous Ballot</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-screen" id="success-screen">
+    <div class="success-icon-wrap">✅</div>
+    <h2>Vote Submitted!</h2>
+    <p>The ballot was stored anonymously. Hand over the kiosk for the next student.</p>
+    <div class="success-token">
+      Receipt Token
+      <strong id="receipt-token">------</strong>
+    </div>
+  </div>
+
+  <script src="{% static 'voting/js/app.js' %}"></script>
+</body>
+</html>
