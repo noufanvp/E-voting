@@ -7,7 +7,7 @@
   <meta name="description" content="School Student Council Election kiosk." />
   <meta name="csrf-token" content="{{ csrf_token }}" />
   <title>E-Voting Kiosk</title>
-  <link rel="stylesheet" href="{% static 'voting/css/style.css' %}" />
+  <link rel="stylesheet" href="{% static 'voting/css/style.css' %}?v=9" />
   <style>
     .operator-bar {
       flex: 0 0 auto;
@@ -62,12 +62,16 @@
 </head>
 <body>
   <header class="header">
-    <div class="school-badge">
-      <span class="dot"></span>
-      <span id="school-name">School Name</span>
+    <div class="header-left">
+      <img src="{% static 'voting/photos/aitute_logo.png' %}" alt="Logo" class="header-logo" />
     </div>
-    <h1 id="election-title">Student Council Election</h1>
-    <p id="header-subtitle">Supervised Kiosk Voting</p>
+    <div class="header-center">
+      <h1 id="election-title">{% if election %}{{ election.title }}{% else %}Student Council Election{% endif %}</h1>
+      <div id="school-name" class="header-school">{% if election %}{{ election.school_name }}{% else %}School Name{% endif %}</div>
+    </div>
+    <div class="header-right">
+      <span id="header-subtitle">Supervised Kiosk Voting</span>
+    </div>
   </header>
 
   <div class="operator-bar">
@@ -128,6 +132,6 @@
     </div>
   </div>
 
-  <script src="{% static 'voting/js/app.js' %}"></script>
+  <script src="{% static 'voting/js/app.js' %}?v=9"></script>
 </body>
 </html>

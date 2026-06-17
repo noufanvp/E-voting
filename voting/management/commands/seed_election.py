@@ -8,63 +8,53 @@ from voting.models import Position
 
 SEED_DATA = [
     {
-        "position": "School President",
+        "position": "HEAD BOY",
         "icon": "👑",
         "candidates": [
-            {"name": "Arjun Mehta", "class_name": "Class 10-A", "motto": "Leading with vision, serving with heart.", "photo": "voting/photos/m1.png"},
-            {"name": "Priya Sharma", "class_name": "Class 10-B", "motto": "Together we rise, divided we fall.", "photo": "voting/photos/f1.png"},
-            {"name": "Rahul Nair", "class_name": "Class 10-C", "motto": "Your voice, my mission.", "photo": "voting/photos/m2.png"},
-            {"name": "NOTA", "class_name": "None of the above.", "motto": "None of the above.", "photo": "", "is_nota": True},
+            {"name": "Muhammed Aiman Changana", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Aiman_Changana.jpg", "symbol": "voting/symbols/symbol_globe.png"},
+            {"name": "Aman Muhammed", "class_name": "N/A", "motto": "", "photo": "voting/photos/Aman_Muhammed.jpg", "symbol": "voting/symbols/symbol_car.png"},
+            {"name": "Muhammed Ayaan KT", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Ayaan_KT.jpg", "symbol": "voting/symbols/symbol_tree.png"},
         ],
     },
     {
-        "position": "Vice President",
+        "position": "SPORTS CAPTAIN",
         "icon": "🌟",
         "candidates": [
-            {"name": "Sneha Patel", "class_name": "Class 9-A", "motto": "Empowering every student every day.", "photo": "voting/photos/f2.png"},
-            {"name": "Kiran Das", "class_name": "Class 9-B", "motto": "Dedication, integrity, excellence.", "photo": "voting/photos/m3.png"},
-            {"name": "Aisha Khan", "class_name": "Class 9-C", "motto": "Stronger together, brighter tomorrow.", "photo": "voting/photos/f3.png"},
-            {"name": "NOTA", "class_name": "None of the above.", "motto": "None of the above.", "photo": "", "is_nota": True},
+            {"name": "Muhammed Hadi MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Hadi_MP.jpg", "symbol": "voting/symbols/symbol_cricketBatAndBall.png"},
+            {"name": "Shahazin U", "class_name": "N/A", "motto": "", "photo": "voting/photos/Shahazin_U.jpg", "symbol": "voting/symbols/symbol_football.png"},
         ],
     },
     {
-        "position": "General Secretary",
-        "icon": "📋",
+        "position": "FINE ARTS SECRETARY",
+        "icon": "🎨",
         "candidates": [
-            {"name": "Dev Pillai", "class_name": "Class 9-A", "motto": "Organised, efficient, always ready.", "photo": "voting/photos/m4.png"},
-            {"name": "Meera Joshi", "class_name": "Class 9-B", "motto": "Your needs, my responsibility.", "photo": "voting/photos/f4.png"},
-            {"name": "NOTA", "class_name": "None of the above.", "motto": "None of the above.", "photo": "", "is_nota": True},
+            {"name": "Shada Fathima", "class_name": "N/A", "motto": "", "photo": "voting/photos/Shada_Fathima.jpg", "symbol": "voting/symbols/symbol_camera.png"},
+            {"name": "Fathima Hadiya M", "class_name": "N/A", "motto": "", "photo": "voting/photos/Fathima_Hadiya_M.jpg", "symbol": "voting/symbols/symbol_torch.png"},
+            {"name": "Ehan Muhammed TK", "class_name": "N/A", "motto": "", "photo": "voting/photos/Ehan_Muhammed_TK.jpg", "symbol": "voting/symbols/symbol_autorickshaw.png"},
+            {"name": "Naban M", "class_name": "N/A", "motto": "", "photo": "voting/photos/Naban_M.jpg", "symbol": "voting/symbols/symbol_jeep.png"}
         ],
     },
     {
-        "position": "Treasurer",
-        "icon": "💰",
+        "position": "MAGAZINE EDITOR",
+        "icon": "📚",
         "candidates": [
-            {"name": "Rohan Verma", "class_name": "Class 8-A", "motto": "Every rupee counts, every student matters.", "photo": "voting/photos/m1.png"},
-            {"name": "Fatima Zahra", "class_name": "Class 8-B", "motto": "Transparent, fair and accountable.", "photo": "voting/photos/f1.png"},
-            {"name": "Nikhil Gupta", "class_name": "Class 8-C", "motto": "Smart spending for a better school.", "photo": "voting/photos/m2.png"},
-            {"name": "NOTA", "class_name": "None of the above.", "motto": "None of the above.", "photo": "", "is_nota": True},
+            {"name": "Gayathri P", "class_name": "N/A", "motto": "", "photo": "voting/photos/Gayathiri_P.jpg", "symbol": "voting/symbols/symbol_guitar.png"},
+            {"name": "Abdullah Nihal N", "class_name": "N/A", "motto": "", "photo": "voting/photos/Abdullah_Nihal_N.jpg", "symbol": "voting/symbols/symbol_laptop.png"},
+            {"name": "Navaru Rahman", "class_name": "N/A", "motto": "", "photo": "voting/photos/Navaru_Rahman.jpg", "symbol": "voting/symbols/symbol_pen.png"},
+            {"name": "Raiza Aysha MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Raiza_Aysha_P.jpg", "symbol": "voting/symbols/symbol_star.png"},
+            {"name": "Azim Sadath P", "class_name": "N/A", "motto": "", "photo": "voting/photos/Azim_Sadath_P.jpg", "symbol": "voting/symbols/symbol_bicycle.png"}            
         ],
     },
     {
-        "position": "Sports Captain",
+        "position": "HEAD PREFECT",
         "icon": "🏆",
         "candidates": [
-            {"name": "Ayesha Reddy", "class_name": "Class 10-A", "motto": "Team spirit fuels every victory.", "photo": "voting/photos/f2.png"},
-            {"name": "Samir Bose", "class_name": "Class 10-B", "motto": "Play hard, win together, stand united.", "photo": "voting/photos/m3.png"},
-            {"name": "NOTA", "class_name": "None of the above.", "motto": "None of the above.", "photo": "", "is_nota": True},
+            {"name": "Sheza Fathima K", "class_name": "N/A", "motto": "", "photo": "voting/photos/Sheza_Fathima_K.jpg", "symbol": "voting/symbols/symbol_bulb.png"},
+            {"name": "Muhammed Yusuf", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Yusuf.jpg", "symbol": "voting/symbols/symbol_bugle.png"},
+            {"name": "Haya Binth Shahrath", "class_name": "N/A", "motto": "", "photo": "voting/photos/Haya_Binth_Shahrath.jpg", "symbol": "voting/symbols/symbol_pencil.png"},
+            {"name": "Dhaheen MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Dhaheen_MP.jpg", "symbol": "voting/symbols/symbol_clock.png"}            
         ],
-    },
-    {
-        "position": "Cultural Secretary",
-        "icon": "🎭",
-        "candidates": [
-            {"name": "Tanvi Iyer", "class_name": "Class 9-C", "motto": "Art, culture & creativity for all.", "photo": "voting/photos/f3.png"},
-            {"name": "Zara Ahmed", "class_name": "Class 9-A", "motto": "Celebrate diversity, inspire creativity.", "photo": "voting/photos/f4.png"},
-            {"name": "Ishaan Roy", "class_name": "Class 9-B", "motto": "Every talent deserves a stage.", "photo": "voting/photos/m4.png"},
-            {"name": "NOTA", "class_name": "None of the above.", "motto": "None of the above.", "photo": "", "is_nota": True},
-        ],
-    },
+    }
 ]
 
 
@@ -76,11 +66,57 @@ class Command(BaseCommand):
         parser.add_argument("--school", default="Mices Public School")
 
     def handle(self, *args, **options):
+        # Create default users if they don't exist
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+
+        # Admin superuser
+        if not User.objects.filter(username="admin").exists():
+            User.objects.create_superuser(username="admin", password="adminpassword123")
+            self.stdout.write("Created superuser: admin")
+
+        # Invigilator user
+        if not User.objects.filter(username="invigilator").exists():
+            User.objects.create_user(username="invigilator", password="MicesInvigilator2026", is_staff=False, is_superuser=False)
+            self.stdout.write("Created user: invigilator")
+        else:
+            user = User.objects.get(username="invigilator")
+            user.set_password("MicesInvigilator2026")
+            user.save()
+            self.stdout.write("Updated password for user: invigilator")
+
+        # Test user
+        if not User.objects.filter(username="testuser").exists():
+            User.objects.create_user(username="testuser", password="MicesTest2026", is_staff=False, is_superuser=False)
+            self.stdout.write("Created user: testuser")
+        else:
+            user = User.objects.get(username="testuser")
+            user.set_password("MicesTest2026")
+            user.save()
+            self.stdout.write("Updated password for user: testuser")
+
+        # micestest user
+        if not User.objects.filter(username="micestest").exists():
+            User.objects.create_user(username="micestest", password="MicesTest2026", is_staff=False, is_superuser=False)
+            self.stdout.write("Created user: micestest")
+        else:
+            user = User.objects.get(username="micestest")
+            user.set_password("MicesTest2026")
+            user.save()
+            self.stdout.write("Updated password for user: micestest")
+
+        # Clean previous data to ensure a fresh, active seed
+        from datetime import timedelta
+        from voting.models import Vote, Ballot
+        Vote.objects.all().delete()
+        Ballot.objects.all().delete()
+        Election.objects.all().delete()
+
         election = Election.objects.create(
             title=options["title"],
             school_name=options["school"],
             status=Election.STATUS_OPEN,
-            starts_at=timezone.now(),
+            starts_at=timezone.now() - timedelta(hours=2),
         )
 
         for p_index, position_data in enumerate(SEED_DATA):
@@ -97,6 +133,7 @@ class Command(BaseCommand):
                     class_name=candidate_data.get("class_name", ""),
                     motto=candidate_data.get("motto", ""),
                     photo=candidate_data.get("photo", ""),
+                    symbol=candidate_data.get("symbol", ""),
                     order=c_index,
                     is_nota=candidate_data.get("is_nota", False),
                 )

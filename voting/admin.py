@@ -10,7 +10,7 @@ from .models import Vote
 class CandidateInline(admin.TabularInline):
 	model = Candidate
 	extra = 0
-	fields = ("order", "name", "class_name", "motto", "photo", "is_nota")
+	fields = ("order", "name", "class_name", "motto", "photo", "symbol", "is_nota")
 	ordering = ("order", "id")
 
 
@@ -32,7 +32,7 @@ class ElectionAdmin(admin.ModelAdmin):
 
 @admin.register(Candidate)
 class CandidateAdmin(admin.ModelAdmin):
-	list_display = ("name", "position", "class_name", "order", "is_nota")
+	list_display = ("name", "position", "class_name", "symbol", "order", "is_nota")
 	list_filter = ("position__election", "position")
 	search_fields = ("name", "position__name")
 	ordering = ("position", "order")

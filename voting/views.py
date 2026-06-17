@@ -40,6 +40,7 @@ def _serialize_election(election):
 						"class": candidate.class_name,
 						"motto": candidate.motto,
 						"photo": candidate.photo,
+						"symbol": candidate.symbol,
 					}
 					for candidate in position.candidates.all().order_by("order", "id")
 				],
@@ -57,7 +58,8 @@ def _serialize_election(election):
 @login_required
 @require_GET
 def kiosk_page(request):
-	return render(request, "voting/index.html")
+	election = _active_election_or_none()
+	return render(request, "voting/index.html", {"election": election})
 
 
 @login_required

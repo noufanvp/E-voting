@@ -63,6 +63,7 @@ class Candidate(models.Model):
 	class_name = models.CharField(max_length=80, blank=True)
 	motto = models.CharField(max_length=255, blank=True)
 	photo = models.CharField(max_length=255, blank=True)
+	symbol = models.CharField(max_length=255, blank=True)
 	order = models.PositiveIntegerField(default=0)
 	is_nota = models.BooleanField(default=False)
 
