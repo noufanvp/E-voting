@@ -192,7 +192,7 @@ function renderSection(index) {
     if (candidate.symbol) {
       const symbolSrc = `/${candidate.symbol.startsWith('voting/') ? 'static/' : ''}${candidate.symbol}`;
       // Extract human-readable name: "voting/symbols/symbol_cricketBatAndBall.png" → "Cricket Bat And Ball"
-      const rawName = candidate.symbol.split('/').pop().replace(/\.png$/i, '').replace(/^symbol_/i, '');
+      const rawName = candidate.symbol.split('/').pop().replace(/\.(png|webp|jpg|jpeg)$/i, '').replace(/^symbol_/i, '');
       const symbolName = rawName
         .replace(/([A-Z])/g, ' $1')   // camelCase → spaces
         .replace(/_/g, ' ')            // underscores → spaces

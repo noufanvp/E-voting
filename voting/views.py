@@ -218,10 +218,12 @@ def results_page(request, election_id):
 	# Test accounts — their votes are excluded from official results
 	TEST_USERNAMES = ["testuser", "micestest"]
 
+	# Count only ballots that have actual votes in this election (excludes stale/orphaned ballots)
 	total_submitted = (
-		election.ballots
-		.filter(status=Ballot.STATUS_SUBMITTED)
-		.exclude(started_by__username__in=TEST_USERNAMES)
+		Vote.objects.filter(position__election=election)
+		.exclude(ballot__started_by__username__in=TEST_USERNAMES)
+		.values("ballot_id")
+		.distinct()
 		.count()
 	)
 
