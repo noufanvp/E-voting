@@ -2,8 +2,11 @@ import json
 
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import Count
 from django.http import HttpResponseBadRequest
+from django.http import HttpResponseForbidden
 from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
@@ -198,3 +201,75 @@ def api_submit_ballot(request):
 
 	request.session.pop("active_ballot_id", None)
 	return JsonResponse({"receipt_token": ballot.receipt_token}, status=200)
+
+
+@require_GET
+def results_page(request, election_id):
+	election = get_object_or_404(Election, id=election_id)
+
+	# Access control: unpublished results are staff/superuser only
+	if not election.results_published:
+		if not request.user.is_authenticated or not (request.user.is_staff or request.user.is_superuser):
+			return HttpResponseForbidden(
+				"<h2 style='font-family:sans-serif;text-align:center;margin-top:80px'>"
+				"🔒 Results have not been published yet.</h2>"
+			)
+
+	total_submitted = election.ballots.filter(status=Ballot.STATUS_SUBMITTED).count()
+
+	positions_data = []
+	for position in election.positions.prefetch_related("candidates").order_by("order", "id"):
+		vote_counts = (
+			Vote.objects.filter(position=position)
+			.values("candidate_id")
+			.annotate(count=Count("id"))
+		)
+		counts_map = {vc["candidate_id"]: vc["count"] for vc in vote_counts}
+		total_votes = sum(counts_map.values())
+
+		candidates_data = []
+		for candidate in position.candidates.order_by("order", "id"):
+			votes = counts_map.get(candidate.id, 0)
+			pct = round((votes / total_votes * 100) if total_votes else 0, 1)
+			candidates_data.append({
+				"id": candidate.id,
+				"name": candidate.name,
+				"photo": candidate.photo,
+				"symbol": candidate.symbol,
+				"class_name": candidate.class_name,
+				"votes": votes,
+				"pct": pct,
+			})
+
+		# Sort descending by votes to find winner
+		candidates_data.sort(key=lambda c: c["votes"], reverse=True)
+		winner_votes = candidates_data[0]["votes"] if candidates_data else 0
+		for c in candidates_data:
+			c["is_winner"] = (c["votes"] == winner_votes and winner_votes > 0)
+
+		positions_data.append({
+			"name": position.name,
+			"icon": position.icon,
+			"total_votes": total_votes,
+			"candidates": candidates_data,
+		})
+
+	context = {
+		"election": election,
+		"positions": positions_data,
+		"total_submitted": total_submitted,
+		"is_superuser": request.user.is_authenticated and request.user.is_superuser,
+	}
+	return render(request, "voting/results.html", context)
+
+
+@login_required
+@require_POST
+def api_publish_results(request, election_id):
+	if not request.user.is_superuser:
+		return JsonResponse({"detail": "Superuser access required."}, status=403)
+
+	election = get_object_or_404(Election, id=election_id)
+	election.results_published = not election.results_published
+	election.save(update_fields=["results_published"])
+	return JsonResponse({"published": election.results_published}, status=200)

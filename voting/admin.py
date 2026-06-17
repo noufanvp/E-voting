@@ -25,9 +25,21 @@ class PositionAdmin(admin.ModelAdmin):
 
 @admin.register(Election)
 class ElectionAdmin(admin.ModelAdmin):
-	list_display = ("title", "school_name", "status", "starts_at", "ends_at")
-	list_filter = ("status",)
+	list_display = ("title", "school_name", "status", "results_published", "starts_at", "ends_at")
+	list_filter = ("status", "results_published")
 	search_fields = ("title", "school_name")
+	list_editable = ("results_published",)
+	actions = ["publish_results", "unpublish_results"]
+
+	@admin.action(description="✅ Publish results for selected elections")
+	def publish_results(self, request, queryset):
+		updated = queryset.update(results_published=True)
+		self.message_user(request, f"{updated} election(s) results published successfully.")
+
+	@admin.action(description="🔒 Unpublish results for selected elections")
+	def unpublish_results(self, request, queryset):
+		updated = queryset.update(results_published=False)
+		self.message_user(request, f"{updated} election(s) results unpublished.")
 
 
 @admin.register(Candidate)

@@ -79,6 +79,11 @@
       Signed in as <strong>{{ request.user.username }}</strong>
     </div>
     <div style="display:flex; align-items:center; gap:8px;">
+      {% if request.user.is_superuser and election %}
+        <a href="{% url 'results' election.id %}" class="btn-nav" style="height:38px; display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:13px; font-weight:700;">
+          🏆 View Results
+        </a>
+      {% endif %}
       <button id="btn-start-session" class="btn-start">Start New Voter Session</button>
       <form method="post" action="{% url 'logout' %}">
         {% csrf_token %}

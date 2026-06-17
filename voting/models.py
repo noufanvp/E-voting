@@ -20,6 +20,7 @@ class Election(models.Model):
 	status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=STATUS_DRAFT)
 	starts_at = models.DateTimeField(null=True, blank=True)
 	ends_at = models.DateTimeField(null=True, blank=True)
+	results_published = models.BooleanField(default=False)
 	created_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
 
