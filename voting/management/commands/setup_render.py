@@ -57,12 +57,22 @@ class Command(BaseCommand):
 
         has_latest = Election.objects.filter(title=desired_title, school_name=desired_school).exists()
         has_positions = False
+        has_legacy_formats = False
+
         if has_latest:
             election = Election.objects.get(title=desired_title, school_name=desired_school)
             has_positions = election.positions.exists()
+            from voting.models import Candidate
+            # Detect if existing data uses old extensions
+            has_legacy_formats = (
+                Candidate.objects.filter(photo__endswith='.jpg').exists() or
+                Candidate.objects.filter(photo__endswith='.png').exists() or
+                Candidate.objects.filter(symbol__endswith='.jpg').exists() or
+                Candidate.objects.filter(symbol__endswith='.png').exists()
+            )
 
-        if force_seed or not has_latest or not has_positions:
-            self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_latest={has_latest}, has_positions={has_positions})...")
+        if force_seed or not has_latest or not has_positions or has_legacy_formats:
+            self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_latest={has_latest}, has_positions={has_positions}, has_legacy_formats={has_legacy_formats})...")
             seed_cmd = SeedElectionCommand()
             # Call seed command handler directly
             seed_cmd.handle(title=desired_title, school=desired_school)
