@@ -50,13 +50,19 @@ class Command(BaseCommand):
             user.save()
             self.stdout.write("Updated password for user: micestest")
 
-        # Seed election if the correct Mices election does not exist
+        # Seed election if the correct Mices election or its positions do not exist, or if forced
         desired_title = "Student Council Election 2026-27"
         desired_school = "Mices Public School"
+        force_seed = os.environ.get("FORCE_SEED", "False") == "True"
 
         has_latest = Election.objects.filter(title=desired_title, school_name=desired_school).exists()
-        if not has_latest:
-            self.stdout.write("Mices Public School election not found. Seeding new election data...")
+        has_positions = False
+        if has_latest:
+            election = Election.objects.get(title=desired_title, school_name=desired_school)
+            has_positions = election.positions.exists()
+
+        if force_seed or not has_latest or not has_positions:
+            self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_latest={has_latest}, has_positions={has_positions})...")
             seed_cmd = SeedElectionCommand()
             # Call seed command handler directly
             seed_cmd.handle(title=desired_title, school=desired_school)

@@ -105,6 +105,12 @@ async function startSession() {
     state.votes = {};
     state.currentSectionIndex = 0;
 
+    if (!state.election || !state.election.positions || state.election.positions.length === 0) {
+      alert("No active election positions configured. Please configure them in the Django Admin panel first.");
+      btn.disabled = false;
+      return;
+    }
+
     document.getElementById('school-name').textContent = state.election.school_name;
     document.getElementById('election-title').textContent = state.election.title;
     document.title = `${state.election.title} | ${state.election.school_name}`;
