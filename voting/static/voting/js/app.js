@@ -470,7 +470,7 @@ function preloadElectionImages(election) {
   });
 
   // Prefetch Aitute logo
-  urls.push('/static/voting/photos/aitute_logo.png');
+  urls.push('/static/voting/photos/aitute_logo.webp');
 
   // De-duplicate URLs and preload
   const uniqueUrls = [...new Set(urls)];

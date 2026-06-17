@@ -11,48 +11,48 @@ SEED_DATA = [
         "position": "HEAD BOY",
         "icon": "👑",
         "candidates": [
-            {"name": "Muhammed Aiman Changana", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Aiman_Changana.jpg", "symbol": "voting/symbols/symbol_globe.png"},
-            {"name": "Aman Muhammed", "class_name": "N/A", "motto": "", "photo": "voting/photos/Aman_Muhammed.jpg", "symbol": "voting/symbols/symbol_car.png"},
-            {"name": "Muhammed Ayaan KT", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Ayaan_KT.jpg", "symbol": "voting/symbols/symbol_tree.png"},
+            {"name": "Muhammed Aiman Changana", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Aiman_Changana.webp", "symbol": "voting/symbols/symbol_globe.webp"},
+            {"name": "Aman Muhammed", "class_name": "N/A", "motto": "", "photo": "voting/photos/Aman_Muhammed.webp", "symbol": "voting/symbols/symbol_car.webp"},
+            {"name": "Muhammed Ayaan KT", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Ayaan_KT.webp", "symbol": "voting/symbols/symbol_tree.webp"},
         ],
     },
     {
         "position": "SPORTS CAPTAIN",
         "icon": "🌟",
         "candidates": [
-            {"name": "Muhammed Hadi MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Hadi_MP.jpg", "symbol": "voting/symbols/symbol_cricketBatAndBall.png"},
-            {"name": "Shahazin U", "class_name": "N/A", "motto": "", "photo": "voting/photos/Shahazin_U.jpg", "symbol": "voting/symbols/symbol_football.png"},
+            {"name": "Muhammed Hadi MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Hadi_MP.webp", "symbol": "voting/symbols/symbol_cricketBatAndBall.webp"},
+            {"name": "Shahazin U", "class_name": "N/A", "motto": "", "photo": "voting/photos/Shahazin_U.webp", "symbol": "voting/symbols/symbol_football.webp"},
         ],
     },
     {
         "position": "FINE ARTS SECRETARY",
         "icon": "🎨",
         "candidates": [
-            {"name": "Shada Fathima", "class_name": "N/A", "motto": "", "photo": "voting/photos/Shada_Fathima.jpg", "symbol": "voting/symbols/symbol_camera.png"},
-            {"name": "Fathima Hadiya M", "class_name": "N/A", "motto": "", "photo": "voting/photos/Fathima_Hadiya_M.jpg", "symbol": "voting/symbols/symbol_torch.png"},
-            {"name": "Ehan Muhammed TK", "class_name": "N/A", "motto": "", "photo": "voting/photos/Ehan_Muhammed_TK.jpg", "symbol": "voting/symbols/symbol_autorickshaw.png"},
-            {"name": "Naban M", "class_name": "N/A", "motto": "", "photo": "voting/photos/Naban_M.jpg", "symbol": "voting/symbols/symbol_jeep.png"}
+            {"name": "Shada Fathima", "class_name": "N/A", "motto": "", "photo": "voting/photos/Shada_Fathima.webp", "symbol": "voting/symbols/symbol_camera.webp"},
+            {"name": "Fathima Hadiya M", "class_name": "N/A", "motto": "", "photo": "voting/photos/Fathima_Hadiya_M.webp", "symbol": "voting/symbols/symbol_torch.webp"},
+            {"name": "Ehan Muhammed TK", "class_name": "N/A", "motto": "", "photo": "voting/photos/Ehan_Muhammed_TK.webp", "symbol": "voting/symbols/symbol_autorickshaw.webp"},
+            {"name": "Naban M", "class_name": "N/A", "motto": "", "photo": "voting/photos/Naban_M.webp", "symbol": "voting/symbols/symbol_jeep.webp"}
         ],
     },
     {
         "position": "MAGAZINE EDITOR",
         "icon": "📚",
         "candidates": [
-            {"name": "Gayathri P", "class_name": "N/A", "motto": "", "photo": "voting/photos/Gayathiri_P.jpg", "symbol": "voting/symbols/symbol_guitar.png"},
-            {"name": "Abdullah Nihal N", "class_name": "N/A", "motto": "", "photo": "voting/photos/Abdullah_Nihal_N.jpg", "symbol": "voting/symbols/symbol_laptop.png"},
-            {"name": "Navaru Rahman", "class_name": "N/A", "motto": "", "photo": "voting/photos/Navaru_Rahman.jpg", "symbol": "voting/symbols/symbol_pen.png"},
-            {"name": "Raiza Aysha MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Raiza_Aysha_P.jpg", "symbol": "voting/symbols/symbol_star.png"},
-            {"name": "Azim Sadath P", "class_name": "N/A", "motto": "", "photo": "voting/photos/Azim_Sadath_P.jpg", "symbol": "voting/symbols/symbol_bicycle.png"}            
+            {"name": "Gayathri P", "class_name": "N/A", "motto": "", "photo": "voting/photos/Gayathiri_P.webp", "symbol": "voting/symbols/symbol_guitar.webp"},
+            {"name": "Abdullah Nihal N", "class_name": "N/A", "motto": "", "photo": "voting/photos/Abdullah_Nihal_N.webp", "symbol": "voting/symbols/symbol_laptop.webp"},
+            {"name": "Navaru Rahman", "class_name": "N/A", "motto": "", "photo": "voting/photos/Navaru_Rahman.webp", "symbol": "voting/symbols/symbol_pen.webp"},
+            {"name": "Raiza Aysha MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Raiza_Aysha_P.webp", "symbol": "voting/symbols/symbol_star.webp"},
+            {"name": "Azim Sadath P", "class_name": "N/A", "motto": "", "photo": "voting/photos/Azim_Sadath_P.webp", "symbol": "voting/symbols/symbol_bicycle.webp"}            
         ],
     },
     {
         "position": "HEAD PREFECT",
         "icon": "🏆",
         "candidates": [
-            {"name": "Sheza Fathima K", "class_name": "N/A", "motto": "", "photo": "voting/photos/Sheza_Fathima_K.jpg", "symbol": "voting/symbols/symbol_bulb.png"},
-            {"name": "Muhammed Yusuf", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Yusuf.jpg", "symbol": "voting/symbols/symbol_bugle.png"},
-            {"name": "Haya Binth Shahrath", "class_name": "N/A", "motto": "", "photo": "voting/photos/Haya_Binth_Shahrath.jpg", "symbol": "voting/symbols/symbol_pencil.png"},
-            {"name": "Dhaheen MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Dhaheen_MP.jpg", "symbol": "voting/symbols/symbol_clock.png"}            
+            {"name": "Sheza Fathima K", "class_name": "N/A", "motto": "", "photo": "voting/photos/Sheza_Fathima_K.webp", "symbol": "voting/symbols/symbol_bulb.webp"},
+            {"name": "Muhammed Yusuf", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Yusuf.webp", "symbol": "voting/symbols/symbol_bugle.webp"},
+            {"name": "Haya Binth Shahrath", "class_name": "N/A", "motto": "", "photo": "voting/photos/Haya_Binth_Shahrath.webp", "symbol": "voting/symbols/symbol_pencil.webp"},
+            {"name": "Dhaheen MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Dhaheen_MP.webp", "symbol": "voting/symbols/symbol_clock.webp"}            
         ],
     }
 ]
