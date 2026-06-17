@@ -111,6 +111,8 @@ async function startSession() {
       return;
     }
 
+    preloadElectionImages(payload.election);
+
     document.getElementById('school-name').textContent = state.election.school_name;
     document.getElementById('election-title').textContent = state.election.title;
     document.title = `${state.election.title} | ${state.election.school_name}`;
@@ -174,7 +176,7 @@ function renderSection(index) {
       const photoSrc = `/${candidate.photo.startsWith('voting/') ? 'static/' : ''}${candidate.photo}`;
       mediaHTML = `
         <div class="candidate-media">
-          <img src="${photoSrc}" alt="${candidate.name}" loading="lazy">
+          <img src="${photoSrc}" alt="${candidate.name}" loading="eager">
         </div>
       `;
     } else {
@@ -203,7 +205,7 @@ function renderSection(index) {
             <span class="symbol-name">${symbolName}</span>
           </div>
           <div class="candidate-symbol-badge">
-            <img src="${symbolSrc}" alt="${candidate.name} symbol" loading="lazy">
+            <img src="${symbolSrc}" alt="${candidate.name} symbol" loading="eager">
           </div>
         </div>
       `;
@@ -449,10 +451,40 @@ function launchConfetti() {
   animate();
 }
 
+function preloadElectionImages(election) {
+  if (!election || !election.positions) return;
+  const urls = [];
+  election.positions.forEach(position => {
+    if (position.candidates) {
+      position.candidates.forEach(candidate => {
+        if (candidate.photo) {
+          const photoSrc = `/${candidate.photo.startsWith('voting/') ? 'static/' : ''}${candidate.photo}`;
+          urls.push(photoSrc);
+        }
+        if (candidate.symbol) {
+          const symbolSrc = `/${candidate.symbol.startsWith('voting/') ? 'static/' : ''}${candidate.symbol}`;
+          urls.push(symbolSrc);
+        }
+      });
+    }
+  });
+
+  // Prefetch Aitute logo
+  urls.push('/static/voting/photos/aitute_logo.png');
+
+  // De-duplicate URLs and preload
+  const uniqueUrls = [...new Set(urls)];
+  uniqueUrls.forEach(url => {
+    const img = new Image();
+    img.src = url;
+  });
+}
+
 async function loadActiveElection() {
   try {
     const election = await api('/api/kiosk/current-election/');
     state.election = election;
+    preloadElectionImages(election);
     document.getElementById('school-name').textContent = election.school_name;
     document.getElementById('election-title').textContent = election.title;
     document.title = `${election.title} | ${election.school_name}`;
