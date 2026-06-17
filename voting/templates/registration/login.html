@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,6 +15,7 @@
       font-family: Arial, sans-serif;
       color: #1e293b;
     }
+
     .card {
       width: min(420px, calc(100vw - 24px));
       background: #fff;
@@ -21,21 +23,25 @@
       padding: 24px;
       box-shadow: 0 10px 30px rgba(30, 41, 59, 0.12);
     }
+
     h1 {
       margin: 0 0 8px;
       font-size: 22px;
     }
+
     p {
       margin: 0 0 16px;
       color: #64748b;
       font-size: 14px;
     }
+
     label {
       display: block;
       font-size: 13px;
       margin: 10px 0 6px;
       font-weight: 700;
     }
+
     input {
       width: 100%;
       border: 1px solid #cbd5e1;
@@ -44,6 +50,7 @@
       font-size: 14px;
       box-sizing: border-box;
     }
+
     button {
       width: 100%;
       margin-top: 14px;
@@ -56,6 +63,7 @@
       font-weight: 700;
       cursor: pointer;
     }
+
     ul {
       margin: 0 0 12px;
       padding: 10px 12px;
@@ -66,15 +74,16 @@
     }
   </style>
 </head>
+
 <body>
   <div class="card">
     <h1>Operator Login</h1>
     <p>Sign in once before supervised kiosk voting begins.</p>
 
     {% if form.errors %}
-      <ul>
-        <li>Invalid username or password.</li>
-      </ul>
+    <ul>
+      <li>Invalid username or password.</li>
+    </ul>
     {% endif %}
 
     <form method="post">
@@ -89,4 +98,5 @@
     </form>
   </div>
 </body>
+
 </html>

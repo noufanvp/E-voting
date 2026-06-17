@@ -72,8 +72,13 @@ class Command(BaseCommand):
 
         # Admin superuser
         if not User.objects.filter(username="admin").exists():
-            User.objects.create_superuser(username="admin", password="adminpassword123")
+            User.objects.create_superuser(username="admin", password="admin123")
             self.stdout.write("Created superuser: admin")
+        else:
+            user = User.objects.get(username="admin")
+            user.set_password("admin123")
+            user.save()
+            self.stdout.write("Updated password for user: admin")
 
         # Invigilator user
         if not User.objects.filter(username="invigilator").exists():

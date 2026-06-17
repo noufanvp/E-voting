@@ -12,11 +12,11 @@ class Command(BaseCommand):
 
         # Admin superuser
         if not User.objects.filter(username="admin").exists():
-            User.objects.create_superuser(username="admin", password="adminpassword123")
+            User.objects.create_superuser(username="admin", password="admin123")
             self.stdout.write(self.style.SUCCESS("Created superuser: admin"))
         else:
             user = User.objects.get(username="admin")
-            user.set_password("adminpassword123")
+            user.set_password("admin123")
             user.save()
             self.stdout.write("Updated password for user: admin")
 
@@ -50,12 +50,16 @@ class Command(BaseCommand):
             user.save()
             self.stdout.write("Updated password for user: micestest")
 
-        # Seed election if database is empty
-        if Election.objects.count() == 0:
-            self.stdout.write("No elections found. Seeding sample election data...")
+        # Seed election if the correct Mices election does not exist
+        desired_title = "Student Council Election 2026-27"
+        desired_school = "Mices Public School"
+
+        has_latest = Election.objects.filter(title=desired_title, school_name=desired_school).exists()
+        if not has_latest:
+            self.stdout.write("Mices Public School election not found. Seeding new election data...")
             seed_cmd = SeedElectionCommand()
             # Call seed command handler directly
-            seed_cmd.handle(title="Student Council Election 2026-27", school="Mices Public School")
-            self.stdout.write(self.style.SUCCESS("Sample election data seeded successfully."))
+            seed_cmd.handle(title=desired_title, school=desired_school)
+            self.stdout.write(self.style.SUCCESS("Mices Public School election data seeded successfully."))
         else:
-            self.stdout.write("Elections exist in the database. Skipping database seeding.")
+            self.stdout.write("Mices Public School election data already exists. Skipping database seeding.")
