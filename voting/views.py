@@ -215,12 +215,21 @@ def results_page(request, election_id):
 				"🔒 Results have not been published yet.</h2>"
 			)
 
-	total_submitted = election.ballots.filter(status=Ballot.STATUS_SUBMITTED).count()
+	# Test accounts — their votes are excluded from official results
+	TEST_USERNAMES = ["testuser", "micestest"]
+
+	total_submitted = (
+		election.ballots
+		.filter(status=Ballot.STATUS_SUBMITTED)
+		.exclude(started_by__username__in=TEST_USERNAMES)
+		.count()
+	)
 
 	positions_data = []
 	for position in election.positions.prefetch_related("candidates").order_by("order", "id"):
 		vote_counts = (
 			Vote.objects.filter(position=position)
+			.exclude(ballot__started_by__username__in=TEST_USERNAMES)
 			.values("candidate_id")
 			.annotate(count=Count("id"))
 		)

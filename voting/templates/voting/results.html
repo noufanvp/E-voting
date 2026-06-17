@@ -446,10 +446,7 @@
         <div class="stat-label">Positions</div>
       </div>
       <div class="stat-card">
-        <div class="stat-num">
-          {% for p in positions %}{% for c in p.candidates %}{% if c.is_winner %}{% if forloop.first and forloop.parentloop.first %}1{% endif %}{% endif %}{% endfor %}{% endfor %}
-          {{ positions|length }}
-        </div>
+        <div class="stat-num">{{ positions|length }}</div>
         <div class="stat-label">Winners Declared</div>
       </div>
     </div>
