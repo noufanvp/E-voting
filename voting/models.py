@@ -2,6 +2,8 @@ import secrets
 
 from django.conf import settings
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -134,3 +136,35 @@ class Vote(models.Model):
 
 	def __str__(self):
 		return f"{self.ballot.receipt_token}: {self.position.name} -> {self.candidate.name}"
+
+
+# ── User Profile (lock / unlock invigilators) ─────────────────────────────
+class UserProfile(models.Model):
+	"""One-to-one extension of the built-in User, adds invigilator lock state."""
+
+	user = models.OneToOneField(
+		settings.AUTH_USER_MODEL,
+		on_delete=models.CASCADE,
+		related_name="profile",
+	)
+	is_locked = models.BooleanField(
+		default=False,
+		help_text="When True, this user cannot start or submit ballots.",
+	)
+	locked_at = models.DateTimeField(null=True, blank=True)
+	locked_reason = models.CharField(max_length=255, blank=True)
+
+	class Meta:
+		verbose_name = "User Profile"
+		verbose_name_plural = "User Profiles"
+
+	def __str__(self):
+		status = "🔒 LOCKED" if self.is_locked else "✅ Active"
+		return f"{self.user.username} [{status}]"
+
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def _auto_create_user_profile(sender, instance, created, **kwargs):
+	"""Automatically create a UserProfile whenever a new User is saved."""
+	if created:
+		UserProfile.objects.get_or_create(user=instance)

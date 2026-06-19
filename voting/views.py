@@ -1,5 +1,6 @@
 import json
 
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count
@@ -16,8 +17,11 @@ from .models import Ballot
 from .models import Candidate
 from .models import Election
 from .models import Position
+from .models import UserProfile
 from .models import Vote
 from .rate_limit import throttle_request
+
+User = get_user_model()
 
 
 def _active_election_or_none():
@@ -79,6 +83,14 @@ def api_current_election(request):
 def api_start_session(request):
 	if throttle_request(request, "start_session", limit=20, window_seconds=60):
 		return JsonResponse({"detail": "Too many start-session attempts."}, status=429)
+
+	# Block locked invigilators
+	profile = getattr(request.user, "profile", None)
+	if profile and profile.is_locked:
+		return JsonResponse(
+			{"detail": "Your account has been locked by the administrator. No new ballots can be started."},
+			status=423,
+		)
 
 	election = _active_election_or_none()
 	if not election:
@@ -158,6 +170,14 @@ def api_save_selection(request):
 def api_submit_ballot(request):
 	if throttle_request(request, "submit_ballot", limit=30, window_seconds=60):
 		return JsonResponse({"detail": "Too many submit attempts."}, status=429)
+
+	# Block locked invigilators
+	profile = getattr(request.user, "profile", None)
+	if profile and profile.is_locked:
+		return JsonResponse(
+			{"detail": "Your account has been locked by the administrator. Ballot submission is disabled."},
+			status=423,
+		)
 
 	try:
 		payload = json.loads(request.body.decode("utf-8"))
@@ -284,3 +304,72 @@ def api_publish_results(request, election_id):
 	election.results_published = not election.results_published
 	election.save(update_fields=["results_published"])
 	return JsonResponse({"published": election.results_published}, status=200)
+
+
+@login_required
+@require_GET
+def api_list_invigilators(request):
+	"""Return list of all non-superuser users with their lock status (superuser only)."""
+	if not request.user.is_superuser:
+		return JsonResponse({"detail": "Superuser access required."}, status=403)
+
+	users = (
+		User.objects
+		.filter(is_superuser=False)
+		.select_related("profile")
+		.order_by("username")
+	)
+
+	data = []
+	for u in users:
+		profile = getattr(u, "profile", None)
+		if profile is None:
+			profile, _ = UserProfile.objects.get_or_create(user=u)
+		data.append({
+			"id": u.id,
+			"username": u.username,
+			"full_name": u.get_full_name() or u.username,
+			"is_staff": u.is_staff,
+			"is_active": u.is_active,
+			"is_locked": profile.is_locked,
+			"locked_reason": profile.locked_reason,
+			"locked_at": profile.locked_at.isoformat() if profile.locked_at else None,
+		})
+
+	return JsonResponse({"users": data}, status=200)
+
+
+@login_required
+@require_POST
+def api_toggle_user_lock(request, user_id):
+	"""Lock or unlock a specific invigilator user (superuser only)."""
+	if not request.user.is_superuser:
+		return JsonResponse({"detail": "Superuser access required."}, status=403)
+
+	target_user = get_object_or_404(User, id=user_id)
+
+	if target_user.is_superuser:
+		return JsonResponse({"detail": "Cannot lock a superuser account."}, status=400)
+
+	try:
+		payload = json.loads(request.body.decode("utf-8"))
+	except json.JSONDecodeError:
+		payload = {}
+
+	reason = payload.get("reason", "Locked by administrator for result publishing")
+
+	profile, _ = UserProfile.objects.get_or_create(user=target_user)
+	profile.is_locked = not profile.is_locked
+	if profile.is_locked:
+		profile.locked_at = timezone.now()
+		profile.locked_reason = reason
+	else:
+		profile.locked_at = None
+		profile.locked_reason = ""
+	profile.save()
+
+	return JsonResponse({
+		"user_id": target_user.id,
+		"username": target_user.username,
+		"is_locked": profile.is_locked,
+	}, status=200)

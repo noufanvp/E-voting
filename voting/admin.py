@@ -1,9 +1,11 @@
 from django.contrib import admin
+from django.utils import timezone
 
 from .models import Ballot
 from .models import Candidate
 from .models import Election
 from .models import Position
+from .models import UserProfile
 from .models import Vote
 
 
@@ -86,3 +88,32 @@ class VoteAdmin(admin.ModelAdmin):
 
 	def has_add_permission(self, request):
 		return False
+
+
+# ── User Profile / Lock Management ───────────────────────────────────────
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+	list_display = ("user", "is_locked", "locked_reason", "locked_at")
+	list_filter = ("is_locked",)
+	search_fields = ("user__username", "user__first_name", "user__last_name", "locked_reason")
+	readonly_fields = ("user", "locked_at")
+	actions = ["lock_users", "unlock_users"]
+
+	@admin.action(description="🔒 Lock selected invigilators (block voting)")
+	def lock_users(self, request, queryset):
+		# Protect superusers
+		safe = queryset.filter(user__is_superuser=False)
+		count = safe.update(
+			is_locked=True,
+			locked_at=timezone.now(),
+			locked_reason="Locked by admin action",
+		)
+		self.message_user(request, f"🔒 {count} user(s) locked — they can no longer start or submit ballots.")
+
+	@admin.action(description="✅ Unlock selected invigilators (restore voting)")
+	def unlock_users(self, request, queryset):
+		count = queryset.update(is_locked=False, locked_at=None, locked_reason="")
+		self.message_user(request, f"✅ {count} user(s) unlocked — they can vote again.")
+
+	def has_add_permission(self, request):
+		return False  # profiles are created automatically

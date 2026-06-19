@@ -12,4 +12,6 @@ urlpatterns = [
     path("api/kiosk/save-selection/", views.api_save_selection, name="api-save-selection"),
     path("api/kiosk/submit/", views.api_submit_ballot, name="api-submit-ballot"),
     path("api/elections/<int:election_id>/publish/", views.api_publish_results, name="api-publish-results"),
+    path("api/admin/users/", views.api_list_invigilators, name="api-list-invigilators"),
+    path("api/admin/users/<int:user_id>/lock/", views.api_toggle_user_lock, name="api-toggle-user-lock"),
 ]
