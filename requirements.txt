@@ -16,3 +16,6 @@ whitenoise>=6.6.0                 # 6.11.0 is installed
 
 # ── Utilities ──────────────────────────────────────────────────────────────
 python-dotenv>=1.0.0              # 1.1.1 is installed
+
+# ── Image Processing ────────────────────────────────────────────────────────
+Pillow>=10.0.0                    # Required for ImageField (Election logo) and image validation

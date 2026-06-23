@@ -1,0 +1,167 @@
+{% extends "portal/base.html" %}
+
+{% block title %}{% if is_create %}New Election{% else %}Edit Election{% endif %}{% endblock %}
+{% block nav_create %}{% if is_create %}active{% endif %}{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'portal-home' %}" class="bc-item">Dashboard</a>
+  <span class="bc-sep">›</span>
+  <span class="bc-item active">{% if is_create %}New Election{% else %}Edit: {{ election.title }}{% endif %}</span>
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-icon">{% if is_create %}➕{% else %}✏️{% endif %}</div>
+      <div>
+        <h1 class="form-card-title">{% if is_create %}Create New Election{% else %}Edit Election{% endif %}</h1>
+        <p class="form-card-sub">{% if is_create %}Set up an election for a new school.{% else %}Update election details and settings.{% endif %}</p>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="portal-form">
+      {% csrf_token %}
+
+      <!-- School Details -->
+      <fieldset class="form-section">
+        <legend class="form-section-title">🏫 School Details</legend>
+
+        <div class="form-group">
+          <label class="form-label" for="school_name">School Name <span class="required">*</span></label>
+          <input type="text" id="school_name" name="school_name"
+                 class="form-input {% if errors.school_name %}input-error{% endif %}"
+                 value="{{ form.school_name|default:'' }}"
+                 placeholder="e.g. Mices Public School"
+                 oninput="autoSlug(this.value)"
+                 required />
+          {% if errors.school_name %}<span class="field-error">{{ errors.school_name }}</span>{% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="school_slug">
+            Kiosk URL Slug
+            <span class="form-hint">auto-generated · used in /vote/&lt;slug&gt;/</span>
+          </label>
+          <div class="input-with-prefix">
+            <span class="input-prefix">/vote/</span>
+            <input type="text" id="school_slug" name="school_slug"
+                   class="form-input"
+                   value="{{ form.school_slug|default:'' }}"
+                   placeholder="mices-public-school" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="logo">School Logo <span class="form-hint">optional · shown in kiosk header</span></label>
+          {% if logo_url %}
+            <div class="current-image-preview" id="logo-preview-wrap">
+              <img src="{{ logo_url }}" alt="Current logo" class="img-preview" id="logo-preview" />
+              <label class="remove-checkbox">
+                <input type="checkbox" name="remove_logo"> Remove logo
+              </label>
+            </div>
+          {% else %}
+            <div class="img-preview-box" id="logo-preview-wrap">
+              <img src="" alt="" class="img-preview hidden" id="logo-preview" />
+              <div class="img-drop-hint" id="logo-drop-hint">📸 Click to upload</div>
+            </div>
+          {% endif %}
+          <input type="file" id="logo" name="logo" class="file-input" accept="image/*"
+                 onchange="previewImage(this, 'logo-preview', 'logo-drop-hint')" />
+          <label for="logo" class="btn btn-sm btn-ghost" style="margin-top:8px">Choose Logo</label>
+        </div>
+      </fieldset>
+
+      <!-- Election Details -->
+      <fieldset class="form-section">
+        <legend class="form-section-title">📋 Election Details</legend>
+
+        <div class="form-group">
+          <label class="form-label" for="title">Election Title <span class="required">*</span></label>
+          <input type="text" id="title" name="title"
+                 class="form-input {% if errors.title %}input-error{% endif %}"
+                 value="{{ form.title|default:'' }}"
+                 placeholder="e.g. Student Council Election 2026-27"
+                 required />
+          {% if errors.title %}<span class="field-error">{{ errors.title }}</span>{% endif %}
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="starts_at">Opening Date & Time <span class="form-hint">optional</span></label>
+            <input type="datetime-local" id="starts_at" name="starts_at"
+                   class="form-input"
+                   value="{{ form.starts_at|default:'' }}" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="ends_at">Closing Date & Time <span class="form-hint">optional</span></label>
+            <input type="datetime-local" id="ends_at" name="ends_at"
+                   class="form-input"
+                   value="{{ form.ends_at|default:'' }}" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="status">Status</label>
+            <select id="status" name="status" class="form-input form-select">
+              <option value="draft" {% if form.status == 'draft' or not form.status %}selected{% endif %}>⚪ Draft</option>
+              <option value="open"  {% if form.status == 'open' %}selected{% endif %}>🟢 Open</option>
+              <option value="closed" {% if form.status == 'closed' %}selected{% endif %}>🔴 Closed</option>
+            </select>
+          </div>
+          {% if not is_create %}
+          <div class="form-group">
+            <label class="form-label">Results</label>
+            <label class="toggle-label">
+              <input type="checkbox" name="results_published" class="toggle-input"
+                     {% if form.results_published %}checked{% endif %} />
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">Published (public can view)</span>
+            </label>
+          </div>
+          {% endif %}
+        </div>
+      </fieldset>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a href="{% url 'portal-home' %}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          {% if is_create %}Create Election & Add Positions →{% else %}Save Changes{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function autoSlug(val) {
+  const slug = val.toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim().replace(/\s+/g, '-');
+  const slugField = document.getElementById('school_slug');
+  if (!slugField._customized) slugField.value = slug;
+}
+document.getElementById('school_slug').addEventListener('input', function() {
+  this._customized = this.value.length > 0;
+});
+function previewImage(input, previewId, hintId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.classList.remove('hidden');
+    const hint = document.getElementById(hintId);
+    if (hint) hint.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+{% endblock %}

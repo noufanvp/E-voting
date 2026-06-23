@@ -11,6 +11,23 @@ function getCsrfToken() {
   return meta ? meta.content : '';
 }
 
+function getSchoolSlug() {
+  const meta = document.querySelector('meta[name="school-slug"]');
+  return meta ? meta.content : '';
+}
+
+/**
+ * Resolve an image path to a full URL.
+ * Legacy static paths start with 'voting/' → /static/voting/...
+ * Uploaded media paths start with 'candidates/' or 'elections/' → /media/...
+ */
+function resolveImageUrl(path) {
+  if (!path) return '';
+  if (path.startsWith('voting/')) return `/static/${path}`;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('/')) return path;
+  return `/media/${path}`;
+}
+
 function jsonHeaders() {
   return {
     'Content-Type': 'application/json',
@@ -96,7 +113,7 @@ async function startSession() {
     const payload = await api('/api/kiosk/start-session/', {
       method: 'POST',
       headers: jsonHeaders(),
-      body: JSON.stringify({}),
+      body: JSON.stringify({ school_slug: getSchoolSlug() }),
     });
 
     state.ballotId = payload.ballot_id;
@@ -113,6 +130,18 @@ async function startSession() {
 
     preloadElectionImages(payload.election);
 
+    const rightLogoContainer = document.getElementById('header-right-logo-container');
+    if (rightLogoContainer) {
+      if (payload.election.logo_url) {
+        rightLogoContainer.innerHTML = `
+          <div class="school-logo-wrap">
+            <img src="${payload.election.logo_url}" alt="${payload.election.school_name} Logo" class="school-logo" />
+          </div>
+        `;
+      } else {
+        rightLogoContainer.innerHTML = '';
+      }
+    }
     document.getElementById('school-name').textContent = state.election.school_name;
     document.getElementById('election-title').textContent = state.election.title;
     document.title = `${state.election.title} | ${state.election.school_name}`;
@@ -173,7 +202,7 @@ function renderSection(index) {
     // ── Build photo/avatar area (top, fills flex space) ──
     let mediaHTML = '';
     if (candidate.photo) {
-      const photoSrc = `/${candidate.photo.startsWith('voting/') ? 'static/' : ''}${candidate.photo}`;
+      const photoSrc = resolveImageUrl(candidate.photo);
       mediaHTML = `
         <div class="candidate-media">
           <img src="${photoSrc}" alt="${candidate.name}" loading="eager">
@@ -187,17 +216,20 @@ function renderSection(index) {
       `;
     }
 
-    // ── Build symbol badge (shown inside details row if symbol exists) ──
+    // ── Build symbol badge ──
     let symbolHTML = '';
     if (candidate.symbol) {
-      const symbolSrc = `/${candidate.symbol.startsWith('voting/') ? 'static/' : ''}${candidate.symbol}`;
-      // Extract human-readable name: "voting/symbols/symbol_cricketBatAndBall.png" → "Cricket Bat And Ball"
-      const rawName = candidate.symbol.split('/').pop().replace(/\.(png|webp|jpg|jpeg)$/i, '').replace(/^symbol_/i, '');
-      const symbolName = rawName
-        .replace(/([A-Z])/g, ' $1')   // camelCase → spaces
-        .replace(/_/g, ' ')            // underscores → spaces
-        .trim()
-        .replace(/\b\w/g, (c) => c.toUpperCase()); // Title Case
+      const symbolSrc = resolveImageUrl(candidate.symbol);
+      let symbolName = candidate.symbol_name;
+      if (!symbolName) {
+        // Fallback: extract human-readable name from filename
+        const rawName = candidate.symbol.split('/').pop().replace(/\.(png|webp|jpg|jpeg)$/i, '').replace(/^symbol_/i, '');
+        symbolName = rawName
+          .replace(/([A-Z])/g, ' $1')   // camelCase → spaces
+          .replace(/_/g, ' ')            // underscores → spaces
+          .trim()
+          .replace(/\b\w/g, (c) => c.toUpperCase()); // Title Case
+      }
       symbolHTML = `
         <div class="candidate-symbol-wrap">
           <div class="candidate-symbol-text">
@@ -211,12 +243,24 @@ function renderSection(index) {
       `;
     }
 
+    let classHTML = '';
+    if (candidate['class'] && candidate['class'].trim() !== '') {
+      classHTML = `<div class="candidate-class">${candidate['class']}</div>`;
+    }
+
+    let mottoHTML = '';
+    if (candidate.motto && candidate.motto.trim() !== '') {
+      mottoHTML = `<div class="candidate-motto">"${candidate.motto}"</div>`;
+    }
+
     card.innerHTML = `
       <div class="check-badge">✓</div>
       ${mediaHTML}
       <div class="candidate-details">
         <div class="candidate-info">
           <div class="candidate-name">${candidate.name}</div>
+          ${classHTML}
+          ${mottoHTML}
         </div>
         ${symbolHTML}
       </div>
@@ -458,11 +502,11 @@ function preloadElectionImages(election) {
     if (position.candidates) {
       position.candidates.forEach(candidate => {
         if (candidate.photo) {
-          const photoSrc = `/${candidate.photo.startsWith('voting/') ? 'static/' : ''}${candidate.photo}`;
+          const photoSrc = resolveImageUrl(candidate.photo);
           urls.push(photoSrc);
         }
         if (candidate.symbol) {
-          const symbolSrc = `/${candidate.symbol.startsWith('voting/') ? 'static/' : ''}${candidate.symbol}`;
+          const symbolSrc = resolveImageUrl(candidate.symbol);
           urls.push(symbolSrc);
         }
       });
@@ -482,9 +526,25 @@ function preloadElectionImages(election) {
 
 async function loadActiveElection() {
   try {
-    const election = await api('/api/kiosk/current-election/');
+    const slug = getSchoolSlug();
+    const url = slug
+      ? `/api/kiosk/current-election/?school=${encodeURIComponent(slug)}`
+      : '/api/kiosk/current-election/';
+    const election = await api(url);
     state.election = election;
     preloadElectionImages(election);
+    const rightLogoContainer = document.getElementById('header-right-logo-container');
+    if (rightLogoContainer) {
+      if (election.logo_url) {
+        rightLogoContainer.innerHTML = `
+          <div class="school-logo-wrap">
+            <img src="${election.logo_url}" alt="${election.school_name} Logo" class="school-logo" />
+          </div>
+        `;
+      } else {
+        rightLogoContainer.innerHTML = '';
+      }
+    }
     document.getElementById('school-name').textContent = election.school_name;
     document.getElementById('election-title').textContent = election.title;
     document.title = `${election.title} | ${election.school_name}`;

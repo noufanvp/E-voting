@@ -1,0 +1,181 @@
+{% extends "portal/base.html" %}
+
+{% block title %}{% if is_create %}Add Candidate{% else %}Edit: {{ candidate.name }}{% endif %} — {{ position.name }}{% endblock %}
+
+{% block breadcrumb %}
+  <a href="{% url 'portal-home' %}" class="bc-item">Dashboard</a>
+  <span class="bc-sep">›</span>
+  <a href="{% url 'portal-positions' position.election_id %}" class="bc-item">Positions</a>
+  <span class="bc-sep">›</span>
+  <span class="bc-item active">{% if is_create %}Add Candidate{% else %}Edit Candidate{% endif %}</span>
+{% endblock %}
+
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-icon">{% if is_create %}👤{% else %}✏️{% endif %}</div>
+      <div>
+        <h1 class="form-card-title">{% if is_create %}Add Candidate{% else %}Edit Candidate{% endif %}</h1>
+        <p class="form-card-sub">Position: <strong>{{ position.icon }} {{ position.name }}</strong> · {{ position.election.school_name }}</p>
+      </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="portal-form">
+      {% csrf_token %}
+
+      <!-- Candidate Info -->
+      <fieldset class="form-section">
+        <legend class="form-section-title">👤 Candidate Details</legend>
+
+        <div class="form-group">
+          <label class="form-label" for="name">Full Name <span class="required">*</span></label>
+          <input type="text" id="name" name="name"
+                 class="form-input {% if errors.name %}input-error{% endif %}"
+                 value="{{ form.name|default:'' }}"
+                 placeholder="e.g. Muhammed Aiman Changana"
+                 required />
+          {% if errors.name %}<span class="field-error">{{ errors.name }}</span>{% endif %}
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label class="form-label" for="class_name">Class <span class="form-hint">optional</span></label>
+            <input type="text" id="class_name" name="class_name"
+                   class="form-input"
+                   value="{{ form.class_name|default:'' }}"
+                   placeholder="e.g. 10-A" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="padding-top:8px">Options</label>
+            <label class="toggle-label" style="margin-top:12px">
+              <input type="checkbox" name="is_nota" class="toggle-input"
+                     {% if form.is_nota %}checked{% endif %} />
+              <span class="toggle-slider"></span>
+              <span class="toggle-text">Mark as NOTA (None of the Above)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="motto">Motto / Tagline <span class="form-hint">optional</span></label>
+          <input type="text" id="motto" name="motto"
+                 class="form-input"
+                 value="{{ form.motto|default:'' }}"
+                 placeholder="e.g. Progress for all" />
+        </div>
+      </fieldset>
+
+      <!-- Images -->
+      <fieldset class="form-section">
+        <legend class="form-section-title">🖼️ Images</legend>
+
+        <div class="form-row-2">
+
+          <!-- Photo -->
+          <div class="form-group">
+            <label class="form-label">Candidate Photo <span class="form-hint">portrait preferred</span></label>
+            <div class="img-upload-wrap">
+              <div class="img-preview-box portrait" id="photo-preview-box">
+                {% if photo_url %}
+                  <img src="{{ photo_url }}" alt="Current photo" class="img-preview" id="photo-preview" />
+                {% else %}
+                  <img src="" alt="" class="img-preview hidden" id="photo-preview" />
+                  <div class="img-drop-hint" id="photo-hint">
+                    <span class="drop-icon">📸</span>
+                    <span>Click to upload</span>
+                  </div>
+                {% endif %}
+              </div>
+              {% if not is_create and photo_url %}
+                <label class="remove-checkbox">
+                  <input type="checkbox" name="remove_photo" id="remove_photo" onchange="togglePreview('photo-preview', 'photo-hint', this)">
+                  Remove photo
+                </label>
+              {% endif %}
+              <input type="file" id="photo" name="photo" class="file-input" accept="image/*"
+                     onchange="previewImage(this, 'photo-preview', 'photo-hint', 'photo-preview-box')" />
+              <label for="photo" class="btn btn-sm btn-ghost" style="margin-top:6px">Choose Photo</label>
+            </div>
+          </div>
+
+          <!-- Symbol -->
+          <div class="form-group">
+            <label class="form-label">Election Symbol <span class="form-hint">square image preferred</span></label>
+            <div class="img-upload-wrap">
+              <div class="img-preview-box square" id="symbol-preview-box">
+                {% if symbol_url %}
+                  <img src="{{ symbol_url }}" alt="Current symbol" class="img-preview" id="symbol-preview" />
+                {% else %}
+                  <img src="" alt="" class="img-preview hidden" id="symbol-preview" />
+                  <div class="img-drop-hint" id="symbol-hint">
+                    <span class="drop-icon">🎭</span>
+                    <span>Click to upload</span>
+                  </div>
+                {% endif %}
+              </div>
+              {% if not is_create and symbol_url %}
+                <label class="remove-checkbox">
+                  <input type="checkbox" name="remove_symbol" id="remove_symbol" onchange="togglePreview('symbol-preview', 'symbol-hint', this)">
+                  Remove symbol
+                </label>
+              {% endif %}
+              <input type="file" id="symbol" name="symbol" class="file-input" accept="image/*"
+                     onchange="previewImage(this, 'symbol-preview', 'symbol-hint', 'symbol-preview-box')" />
+              <label for="symbol" class="btn btn-sm btn-ghost" style="margin-top:6px">Choose Symbol</label>
+            </div>
+            
+            <div style="margin-top: 16px;">
+              <label class="form-label" for="symbol_name">Symbol Name <span class="form-hint">optional</span></label>
+              <input type="text" id="symbol_name" name="symbol_name"
+                     class="form-input"
+                     value="{{ form.symbol_name|default:'' }}"
+                     placeholder="e.g. Globe" />
+            </div>
+          </div>
+
+        </div>
+      </fieldset>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <a href="{% url 'portal-positions' position.election_id %}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">
+          {% if is_create %}Add Candidate{% else %}Save Changes{% endif %}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewImage(input, previewId, hintId, boxId) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById(previewId);
+    img.src = e.target.result;
+    img.classList.remove('hidden');
+    const hint = document.getElementById(hintId);
+    if (hint) hint.style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function togglePreview(previewId, hintId, checkbox) {
+  const img = document.getElementById(previewId);
+  const hint = document.getElementById(hintId);
+  if (checkbox.checked) {
+    img.classList.add('hidden');
+    if (hint) hint.style.display = 'flex';
+  } else {
+    img.classList.remove('hidden');
+    if (hint) hint.style.display = 'none';
+  }
+}
+</script>
+{% endblock %}

@@ -108,6 +108,24 @@ body {
   display: block;
 }
 
+/* Right Section: School Logo Wrap */
+.school-logo-wrap {
+  background: #ffffff;
+  padding: 4px 10px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  height: 38px;
+}
+
+.school-logo {
+  height: 28px;
+  width: auto;
+  object-fit: contain;
+}
+
 /* Center Section: Titles stacked */
 .header-center {
   display: flex;
@@ -377,7 +395,8 @@ body {
 
 /* ── Photo / avatar area ─────────────────────────────── */
 .candidate-media {
-  flex: 1 1 0;
+  flex: 1 1 auto;
+  aspect-ratio: 3 / 4;
   min-height: 80px;      /* ★ Never collapse — guarantees avatar visibility */
   width: 100%;
   overflow: hidden;
@@ -447,11 +466,22 @@ body {
 .candidate-class {
   font-size: 10px;
   color: var(--text-muted);
-  font-weight: 500;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.2;
+}
+
+.candidate-motto {
+  font-size: 9px;
+  color: var(--text-light);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  margin-top: 1px;
 }
 
 /* ── Election symbol — compact horizontal layout ─────── */

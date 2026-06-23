@@ -6,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="School Student Council Election kiosk." />
   <meta name="csrf-token" content="{{ csrf_token }}" />
+  <meta name="school-slug" content="{{ school_slug }}" />
   <title>E-Voting Kiosk</title>
-  <link rel="stylesheet" href="{% static 'voting/css/style.css' %}?v=9" />
+  <link rel="stylesheet" href="{% static 'voting/css/style.css' %}?v=12" />
   <style>
     .operator-bar {
       flex: 0 0 auto;
@@ -19,58 +20,39 @@
       background: var(--surface);
       gap: 12px;
     }
-
-    .operator-meta {
-      font-size: 12px;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
+    .operator-meta { font-size: 12px; color: var(--text-muted); font-weight: 600; }
     .btn-start {
-      height: 38px;
-      border: none;
-      border-radius: var(--r-md);
-      padding: 0 14px;
-      font-size: 13px;
-      font-weight: 700;
-      color: #fff;
-      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
-      cursor: pointer;
+      height: 38px; border: none; border-radius: var(--r-md);
+      padding: 0 14px; font-size: 13px; font-weight: 700; color: #fff;
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary)); cursor: pointer;
     }
-
-    .btn-start:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
+    .btn-start:disabled { opacity: .5; cursor: not-allowed; }
     .waiting-screen {
-      flex: 1 1 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 24px;
-      color: var(--text-muted);
-      font-weight: 600;
-      font-size: 14px;
+      flex: 1 1 0; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 24px; color: var(--text-muted);
+      font-weight: 600; font-size: 14px;
     }
-
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <header class="header">
     <div class="header-left">
-      <img src="{% static 'voting/photos/aitute_logo.webp' %}" alt="Logo" class="header-logo" />
+      <!-- Fixed company logo -->
+      <img id="header-logo"
+           src="{% static 'voting/photos/aitute_logo.webp' %}"
+           alt="Logo" class="header-logo" />
     </div>
     <div class="header-center">
       <h1 id="election-title">{% if election %}{{ election.title }}{% else %}Student Council Election{% endif %}</h1>
       <div id="school-name" class="header-school">{% if election %}{{ election.school_name }}{% else %}School Name{% endif %}</div>
     </div>
-    <div class="header-right">
-      <span id="header-subtitle">Supervised Kiosk Voting</span>
+    <div class="header-right" id="header-right-logo-container">
+      {% if election and election.logo %}
+        <div class="school-logo-wrap">
+          <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="school-logo" />
+        </div>
+      {% endif %}
     </div>
   </header>
 
@@ -79,10 +61,15 @@
       Signed in as <strong>{{ request.user.username }}</strong>
     </div>
     <div style="display:flex; align-items:center; gap:8px;">
-      {% if request.user.is_superuser and election %}
+      {% if request.user.is_superuser %}
+        <a href="{% url 'portal-home' %}" class="btn-nav" style="height:38px; display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:13px; font-weight:700;">
+          ⚙️ Admin Portal
+        </a>
+        {% if election %}
         <a href="{% url 'results' election.id %}" class="btn-nav" style="height:38px; display:inline-flex; align-items:center; gap:6px; text-decoration:none; font-size:13px; font-weight:700;">
           🏆 View Results
         </a>
+        {% endif %}
       {% endif %}
       <button id="btn-start-session" class="btn-start">Start New Voter Session</button>
       <form method="post" action="{% url 'logout' %}">
@@ -117,9 +104,7 @@
       <div class="modal-icon">🗳️</div>
       <h2>Confirm Ballot</h2>
       <p>Please verify selections before final submission.</p>
-
       <div class="modal-votes-summary" id="modal-summary"></div>
-
       <div class="modal-actions">
         <button class="btn-cancel" id="btn-close-modal">Go Back</button>
         <button class="btn-confirm" id="btn-confirm-submit">Submit Anonymous Ballot</button>
@@ -137,6 +122,6 @@
     </div>
   </div>
 
-  <script src="{% static 'voting/js/app.js' %}?v=9"></script>
+  <script src="{% static 'voting/js/app.js' %}?v=12"></script>
 </body>
 </html>

@@ -1,0 +1,108 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{% block title %}Admin Portal{% endblock %} · E-Voting</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="{% static 'voting/css/portal.css' %}" />
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+  <div class="portal-layout">
+
+    <!-- ── Sidebar ── -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-icon">🗳️</div>
+        <div class="brand-text">
+          <span class="brand-title">E-Voting</span>
+          <span class="brand-sub">Admin Portal</span>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="{% url 'portal-home' %}" class="nav-item {% block nav_dashboard %}{% endblock %}">
+          <span class="nav-icon">🏠</span>
+          <span>Dashboard</span>
+        </a>
+        <a href="{% url 'portal-election-create' %}" class="nav-item {% block nav_create %}{% endblock %}">
+          <span class="nav-icon">➕</span>
+          <span>New Election</span>
+        </a>
+        <a href="{% url 'portal-invigilators' %}" class="nav-item {% block nav_invigilators %}{% endblock %}">
+          <span class="nav-icon">👤</span>
+          <span>Invigilators</span>
+        </a>
+        <div class="nav-divider"></div>
+        <a href="/" class="nav-item">
+          <span class="nav-icon">🖥️</span>
+          <span>Kiosk</span>
+        </a>
+        <a href="/admin/" class="nav-item">
+          <span class="nav-icon">⚙️</span>
+          <span>Django Admin</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+          <div class="user-info">
+            <span class="user-name">{{ request.user.username }}</span>
+            <span class="user-role">Superuser</span>
+          </div>
+        </div>
+        <form method="post" action="{% url 'logout' %}">
+          {% csrf_token %}
+          <button type="submit" class="btn-logout" title="Logout">↩</button>
+        </form>
+      </div>
+    </aside>
+
+    <!-- ── Main Content ── -->
+    <main class="main-content">
+      <div class="topbar">
+        <div class="breadcrumb">
+          {% block breadcrumb %}
+            <span class="bc-item active">Dashboard</span>
+          {% endblock %}
+        </div>
+        <div class="topbar-actions">
+          {% block topbar_actions %}{% endblock %}
+        </div>
+      </div>
+
+      <div class="page-body">
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+  </div>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    const CSRF_TOKEN = "{{ csrf_token }}";
+    function showToast(msg, type = 'success') {
+      const el = document.createElement('div');
+      el.className = `toast toast-${type}`;
+      el.textContent = msg;
+      document.getElementById('toast-container').appendChild(el);
+      setTimeout(() => el.classList.add('show'), 10);
+      setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 300); }, 3000);
+    }
+  </script>
+  <script src="{% static 'voting/js/portal.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

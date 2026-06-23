@@ -5,6 +5,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 class Election(models.Model):
@@ -19,6 +20,17 @@ class Election(models.Model):
 
 	title = models.CharField(max_length=200)
 	school_name = models.CharField(max_length=200)
+	school_slug = models.SlugField(
+		max_length=100,
+		blank=True,
+		db_index=True,
+		help_text="Auto-generated from school name. Used in kiosk URL: /vote/<slug>/",
+	)
+	logo = models.ImageField(
+		upload_to="elections/logos/",
+		blank=True,
+		help_text="Optional school logo shown in the kiosk header.",
+	)
 	status = models.CharField(max_length=12, choices=STATUS_CHOICES, default=STATUS_DRAFT)
 	starts_at = models.DateTimeField(null=True, blank=True)
 	ends_at = models.DateTimeField(null=True, blank=True)
@@ -31,6 +43,13 @@ class Election(models.Model):
 
 	def __str__(self):
 		return self.title
+
+	def save(self, *args, **kwargs):
+		"""Auto-populate school_slug from school_name if not set."""
+		if not self.school_slug and self.school_name:
+			base_slug = slugify(self.school_name)
+			self.school_slug = base_slug or "school"
+		super().save(*args, **kwargs)
 
 	def is_active(self):
 		now = timezone.now()
@@ -65,8 +84,9 @@ class Candidate(models.Model):
 	name = models.CharField(max_length=140)
 	class_name = models.CharField(max_length=80, blank=True)
 	motto = models.CharField(max_length=255, blank=True)
-	photo = models.CharField(max_length=255, blank=True)
-	symbol = models.CharField(max_length=255, blank=True)
+	photo = models.ImageField(upload_to="candidates/photos", blank=True, null=True)
+	symbol = models.ImageField(upload_to="candidates/symbols", blank=True, null=True)
+	symbol_name = models.CharField(max_length=50, blank=True, help_text="Text to display alongside the symbol (e.g. 'Globe')")
 	order = models.PositiveIntegerField(default=0)
 	is_nota = models.BooleanField(default=False)
 
@@ -153,6 +173,20 @@ class UserProfile(models.Model):
 	)
 	locked_at = models.DateTimeField(null=True, blank=True)
 	locked_reason = models.CharField(max_length=255, blank=True)
+	school_name = models.CharField(
+		max_length=200,
+		blank=True,
+		help_text="The school this invigilator is assigned to (blank for superusers/all schools).",
+	)
+	school_slug = models.SlugField(
+		max_length=100,
+		blank=True,
+		help_text="The school slug this invigilator is assigned to.",
+	)
+	exclude_votes = models.BooleanField(
+		default=False,
+		help_text="Exclude votes cast during sessions started by this invigilator from final results counting.",
+	)
 
 	class Meta:
 		verbose_name = "User Profile"

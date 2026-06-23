@@ -41,6 +41,8 @@
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
     /* ── Header ─────────────────────────────── */
@@ -81,10 +83,26 @@
 
     .header-right {
       flex: 0 0 auto;
-      font-size: 12px;
-      font-weight: 600;
-      color: rgba(255,255,255,.75);
-      text-align: right;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .school-logo-wrap {
+      background: #ffffff;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      height: 38px;
+    }
+
+    .school-logo {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
     }
 
     /* ── Hero Stats Banner ───────────────────── */
@@ -322,6 +340,8 @@
       max-width: 960px;
       margin: 0 auto;
       padding: 32px 20px 60px;
+      flex: 1 0 auto;
+      width: 100%;
     }
 
     .section-title {
@@ -506,12 +526,347 @@
       margin-top: 40px;
     }
 
-    /* ── Print styles ────────────────────────── */
+    /* ── Action Bar (Screen Only) ────────────────── */
+    .action-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: var(--r-md);
+      font-size: 13px;
+      font-weight: 700;
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-print {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: #fff;
+      box-shadow: 0 4px 14px rgba(79,70,229,0.25);
+    }
+    .btn-print:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(79,70,229,0.35);
+    }
+    .btn-pdf {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border);
+      box-shadow: var(--sh-md);
+    }
+    .btn-pdf:hover {
+      background: var(--bg);
+      transform: translateY(-1px);
+    }
+    .btn-icon {
+      flex-shrink: 0;
+    }
+    .animate-spin {
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ── Print Stylesheet & Layout ────────────────── */
+    .print-report-container {
+      display: none;
+    }
+
+    /* Print styling rules defined globally so that html2canvas captures them on screen */
+    .print-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+    .print-logo {
+      height: 52px;
+      width: auto;
+      object-fit: contain;
+    }
+    .print-header-text h2 {
+      font-size: 18pt;
+      font-weight: 800;
+      color: #1e293b;
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .print-subtitle {
+      font-size: 9pt;
+      color: #64748b;
+      margin: 1px 0 0 0;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+    .print-divider {
+      height: 3px;
+      background: linear-gradient(90deg, #4f46e5 0%, #818cf8 100%);
+      margin-bottom: 16px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-title-area {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .print-report-title {
+      font-size: 16pt;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0 0 4px 0;
+      letter-spacing: 0.3px;
+    }
+    .print-status-badge {
+      display: inline-block;
+      font-size: 8.5pt;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 4px;
+      letter-spacing: 0.8px;
+    }
+    .print-status-badge.certified {
+      background-color: #dcfce7 !important;
+      color: #15803d !important;
+      border: 1px solid #bbf7d0;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-status-badge.draft {
+      background-color: #fee2e2 !important;
+      color: #b91c1c !important;
+      border: 1px solid #fecaca;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-metadata-box {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 16px;
+      background-color: #f8fafc !important;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 20px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-meta-item {
+      font-size: 9.5pt;
+      color: #334155;
+      text-align: left;
+    }
+    .print-meta-item strong {
+      color: #0f172a;
+    }
+    .print-section {
+      margin-bottom: 24px;
+    }
+    .print-section h3 {
+      font-size: 11pt;
+      font-weight: 800;
+      color: #1e293b;
+      border-bottom: 1.5px solid #cbd5e1;
+      padding-bottom: 4px;
+      margin: 0 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: left;
+    }
+    .print-position-block {
+      margin-bottom: 20px;
+      break-inside: avoid;
+    }
+    .print-position-header {
+      display: flex;
+      align-items: center;
+      background-color: #f1f5f9 !important;
+      border: 1px solid #cbd5e1;
+      border-bottom: none;
+      padding: 6px 10px;
+      font-weight: 800;
+      font-size: 10pt;
+      color: #1e293b;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-pos-icon {
+      margin-right: 6px;
+    }
+    .print-pos-name {
+      text-transform: uppercase;
+    }
+    .print-pos-total {
+      margin-left: auto;
+      font-size: 8.5pt;
+      color: #64748b;
+      font-weight: 600;
+    }
+    .print-results-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 9pt;
+      border: 1px solid #cbd5e1;
+    }
+    .print-results-table th {
+      background-color: #f8fafc !important;
+      border: 1px solid #cbd5e1;
+      padding: 6px 8px;
+      font-weight: 700;
+      color: #475569;
+      text-transform: uppercase;
+      font-size: 7.5pt;
+      letter-spacing: 0.5px;
+      text-align: left;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-results-table td {
+      border: 1px solid #e2e8f0;
+      padding: 6px 8px;
+      vertical-align: middle;
+      color: #334155;
+      text-align: left;
+    }
+    .print-results-table tr.winner-row {
+      background-color: #fffbeb !important;
+      font-weight: 500;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-results-table tr.winner-row td {
+      border-color: #fde68a;
+    }
+    .print-td-photo {
+      text-align: center !important;
+      padding: 3px !important;
+    }
+    .print-cand-photo {
+      width: 28px;
+      height: 36px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      display: block;
+      margin: 0 auto;
+    }
+    .print-cand-avatar {
+      width: 28px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      background-color: #e2e8f0 !important;
+      color: #475569;
+      font-weight: 700;
+      border-radius: 4px;
+      margin: 0 auto;
+      font-size: 10pt;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-cand-symbol {
+      width: 20px !important;
+      height: 20px !important;
+      max-width: 20px !important;
+      max-height: 20px !important;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    .print-cand-name {
+      font-weight: 700;
+      color: #0f172a;
+    }
+    .print-cand-class {
+      font-size: 7.5pt;
+      color: #64748b;
+      margin-top: 1px;
+    }
+    .print-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .print-bar-fill {
+      height: 8px;
+      background-color: #cbd5e1 !important;
+      border-radius: 2px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    tr.winner-row .print-bar-fill {
+      background-color: #f59e0b !important;
+    }
+    .print-pct-val {
+      font-size: 8pt;
+      font-weight: 700;
+    }
+    .print-winner-badge {
+      display: inline-block;
+      background-color: #fef3c7 !important;
+      color: #d97706 !important;
+      border: 1px solid #fde68a;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 7pt;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      white-space: nowrap;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .print-muted {
+      color: #94a3b8;
+    }
+    .print-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 7pt;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 4px;
+      background: #fff;
+      margin-top: 20px;
+    }
+
     @media print {
-      .header { position: static; box-shadow: none; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .publish-bar { display: none; }
-      .vote-bar-fill { animation: none !important; width: var(--bar-pct) !important; }
-      .position-card { break-inside: avoid; }
+      body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'Inter', sans-serif;
+        font-size: 11pt;
+        line-height: 1.35;
+        padding: 0;
+        margin: 0;
+      }
+      .no-print, .header, .stats-banner, .publish-bar, .lock-panel, .container, .footer {
+        display: none !important;
+      }
+      .print-report-container {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+      }
+      .print-footer {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+      }
     }
 
     /* ── Responsive ──────────────────────────── */
@@ -534,7 +889,13 @@
       <h1>{{ election.title }}</h1>
       <div class="header-school">{{ election.school_name }}</div>
     </div>
-    <div class="header-right">Official Election Results</div>
+    <div class="header-right">
+      {% if election and election.logo %}
+        <div class="school-logo-wrap">
+          <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="school-logo" />
+        </div>
+      {% endif %}
+    </div>
   </header>
 
   <!-- ── Hero Stats Banner ── -->
@@ -619,6 +980,18 @@
 
   <!-- ── Results Container ── -->
   <div class="container">
+    <!-- ── Action Bar (Screen Only) ── -->
+    <div class="action-bar no-print">
+      <button class="btn-action btn-print" onclick="window.print()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+          <polyline points="6 9 6 2 18 2 18 9"></polyline>
+          <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+          <rect x="6" y="14" width="12" height="8"></rect>
+        </svg>
+        Print Report / Save PDF
+      </button>
+    </div>
+
     <p class="section-title">Results by Position</p>
 
     {% for position in positions %}
@@ -642,7 +1015,7 @@
           <!-- Photo -->
           {% if candidate.photo %}
             <img
-              src="/{% if candidate.photo|slice:':7' == 'voting/' %}static/{% endif %}{{ candidate.photo }}"
+              src="{% if candidate.photo.name|slice:':7' == 'voting/' %}{% static candidate.photo.name %}{% else %}{{ candidate.photo.url }}{% endif %}"
               alt="{{ candidate.name }}"
               class="cand-photo {% if candidate.is_winner %}winner-img{% endif %}"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
@@ -657,7 +1030,7 @@
           <!-- Symbol -->
           {% if candidate.symbol %}
             <img
-              src="/{% if candidate.symbol|slice:':7' == 'voting/' %}static/{% endif %}{{ candidate.symbol }}"
+              src="{% if candidate.symbol.name|slice:':7' == 'voting/' %}{% static candidate.symbol.name %}{% else %}{{ candidate.symbol.url }}{% endif %}"
               alt="symbol"
               class="cand-symbol"
             />
@@ -867,5 +1240,151 @@
   </script>
   {% endif %}
 
+  <!-- ── Printable Report Container (Hidden on Screen) ── -->
+  <div class="print-report-container">
+    <div class="print-header">
+      <!-- Left side: Brand Logo -->
+      <div class="print-logo-wrap">
+        <img src="{% static 'voting/photos/aitute_logo.webp' %}" alt="Aitute Logo" class="print-logo" />
+      </div>
+      
+      <!-- Center: School Name / Subtitle -->
+      <div class="print-header-text">
+        <h2>{{ election.school_name }}</h2>
+        <p class="print-subtitle">Official Student Representation Body</p>
+      </div>
+
+      <!-- Right side: School Logo (if exists) -->
+      {% if election.logo %}
+      <div class="print-logo-wrap">
+        <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="print-logo" />
+      </div>
+      {% endif %}
+    </div>
+    
+    <div class="print-divider"></div>
+    
+    <div class="print-title-area">
+      <h1 class="print-report-title">OFFICIAL ELECTION RESULTS REPORT</h1>
+      <div class="print-status-badge {% if election.results_published %}certified{% else %}draft{% endif %}">
+        {% if election.results_published %}OFFICIALLY CERTIFIED{% else %}OFFICIAL PREVIEW DRAFT{% endif %}
+      </div>
+    </div>
+    
+    <div class="print-metadata-box">
+      <div class="print-meta-item">
+        <strong>Election Title:</strong> <span>{{ election.title }}</span>
+      </div>
+      <div class="print-meta-item">
+        <strong>Institution:</strong> <span>{{ election.school_name }}</span>
+      </div>
+      <div class="print-meta-item">
+        <strong>Total Ballots Cast:</strong> <span>{{ total_submitted }} votes</span>
+      </div>
+      <div class="print-meta-item">
+        <strong>Date Generated:</strong> <span id="print-current-date"></span>
+      </div>
+    </div>
+    
+    <div class="print-section print-breakdown">
+      <h3>Election Results by Position</h3>
+      
+      {% for position in positions %}
+      <div class="print-position-block">
+        <div class="print-position-header">
+          <span class="print-pos-icon">{{ position.icon }}</span>
+          <span class="print-pos-name">{{ position.name }}</span>
+          <span class="print-pos-total">Total Votes: {{ position.total_votes }}</span>
+        </div>
+        
+        {% if position.total_votes == 0 %}
+          <p class="print-no-votes">No votes recorded for this position.</p>
+        {% else %}
+          <table class="print-results-table">
+            <thead>
+              <tr>
+                <th style="width: 8%;">Photo</th>
+                <th style="width: 35%;">Candidate Name</th>
+                <th style="width: 12%;">Symbol</th>
+                <th style="width: 15%; text-align: right;">Votes</th>
+                <th style="width: 20%; text-align: left;">Share (%)</th>
+                <th style="width: 10%; text-align: center;">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for candidate in position.candidates %}
+              <tr class="{% if candidate.is_winner %}winner-row{% endif %}">
+                <td class="print-td-photo">
+                  {% if candidate.photo %}
+                    <img src="{% if candidate.photo.name|slice:':7' == 'voting/' %}{% static candidate.photo.name %}{% else %}{{ candidate.photo.url }}{% endif %}" alt="" class="print-cand-photo" onerror="this.style.display='none';this.nextElementSibling.style.display='block';" />
+                    <div class="print-cand-avatar" style="display:none;">{{ candidate.name|slice:":1" }}</div>
+                  {% else %}
+                    <div class="print-cand-avatar">{{ candidate.name|slice:":1" }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="print-cand-name">{{ candidate.name }}</div>
+                  {% if candidate.class_name and candidate.class_name != "N/A" %}
+                    <div class="print-cand-class">{{ candidate.class_name }}</div>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if candidate.symbol %}
+                    <img src="{% if candidate.symbol.name|slice:':7' == 'voting/' %}{% static candidate.symbol.name %}{% else %}{{ candidate.symbol.url }}{% endif %}" alt="" class="print-cand-symbol" />
+                  {% else %}
+                    <span class="print-muted">-</span>
+                  {% endif %}
+                </td>
+                <td style="text-align: right; font-weight: 700;">{{ candidate.votes }}</td>
+                <td>
+                  <div class="print-bar-container">
+                    <div class="print-bar-fill" style="width: {{ candidate.pct }}%;"></div>
+                    <span class="print-pct-val">{{ candidate.pct }}%</span>
+                  </div>
+                </td>
+                <td style="text-align: center;">
+                  {% if candidate.is_winner %}
+                    <span class="print-winner-badge">👑 WINNER</span>
+                  {% else %}
+                    <span class="print-muted">-</span>
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    
+    <div class="print-footer">
+      <div class="print-footer-left">
+        E-Voting Portal — System-Generated Official Report
+      </div>
+      <div class="print-footer-right">
+        Official Result Announcement Summary
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PDF Generation & Date Scripts ── -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script>
+    function setPrintDate() {
+      const dateSpan = document.querySelector('.print-report-container #print-current-date');
+      if (dateSpan) {
+        dateSpan.textContent = new Date().toLocaleString('en-US', {
+          dateStyle: 'medium',
+          timeStyle: 'short'
+        });
+      }
+    }
+    
+    document.addEventListener('DOMContentLoaded', setPrintDate);
+    window.addEventListener('beforeprint', setPrintDate);
+    
+    
+  </script>
 </body>
 </html>

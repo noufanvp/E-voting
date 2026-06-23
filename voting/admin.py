@@ -27,11 +27,17 @@ class PositionAdmin(admin.ModelAdmin):
 
 @admin.register(Election)
 class ElectionAdmin(admin.ModelAdmin):
-	list_display = ("title", "school_name", "status", "results_published", "starts_at", "ends_at")
+	list_display = ("title", "school_name", "school_slug", "status", "results_published", "starts_at", "ends_at")
 	list_filter = ("status", "results_published")
-	search_fields = ("title", "school_name")
+	search_fields = ("title", "school_name", "school_slug")
 	list_editable = ("results_published",)
+	readonly_fields = ("school_slug",)  # managed by portal; shown read-only here
 	actions = ["publish_results", "unpublish_results"]
+	fieldsets = (
+		("School", {"fields": ("school_name", "school_slug", "logo")}),
+		("Election", {"fields": ("title", "status", "starts_at", "ends_at")}),
+		("Results", {"fields": ("results_published",)}),
+	)
 
 	@admin.action(description="✅ Publish results for selected elections")
 	def publish_results(self, request, queryset):

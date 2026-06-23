@@ -4,6 +4,9 @@ from . import views
 
 
 urlpatterns = [
+    # School-specific kiosk (primary URL for multi-school support)
+    path("vote/<slug:school_slug>/", views.kiosk_page, name="kiosk-school"),
+    # Legacy fallback kiosk (serves any active election)
     path("", views.kiosk_page, name="kiosk"),
     path("results/<int:election_id>/", views.results_page, name="results"),
     path("api/elections/current/", views.api_current_election, name="api-current-election"),
@@ -15,3 +18,4 @@ urlpatterns = [
     path("api/admin/users/", views.api_list_invigilators, name="api-list-invigilators"),
     path("api/admin/users/<int:user_id>/lock/", views.api_toggle_user_lock, name="api-toggle-user-lock"),
 ]
+

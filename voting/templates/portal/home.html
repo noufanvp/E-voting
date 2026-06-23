@@ -1,0 +1,197 @@
+{% extends "portal/base.html" %}
+{% load humanize %}
+
+{% block title %}Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block topbar_actions %}
+  <a href="{% url 'portal-election-create' %}" class="btn btn-primary">
+    <span>➕</span> New Election
+  </a>
+{% endblock %}
+
+{% block content %}
+
+<!-- ── Stats Strip ── -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon">🏫</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ total_elections }}</div>
+      <div class="stat-label">Total Elections</div>
+    </div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-icon">🟢</div>
+    <div class="stat-body">
+      <div class="stat-value">{{ active_count }}</div>
+      <div class="stat-label">Active Now</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Elections List ── -->
+{% if elections_data %}
+  <div class="section-header">
+    <h2 class="section-title">All Elections</h2>
+    <span class="section-count">{{ total_elections }} total</span>
+  </div>
+
+  <div class="elections-grid">
+    {% for ed in elections_data %}
+      {% with e=ed.obj stats=ed.stats %}
+      <div class="election-card {% if e.status == 'open' %}card-open{% elif e.status == 'closed' %}card-closed{% else %}card-draft{% endif %}">
+
+        <!-- Card Header -->
+        <div class="card-header">
+          {% if ed.logo_url %}
+            <img src="{{ ed.logo_url }}" alt="{{ e.school_name }} logo" class="school-logo-thumb" />
+          {% else %}
+            <div class="school-logo-placeholder">🏫</div>
+          {% endif %}
+          <div class="card-header-text">
+            <div class="school-name">{{ e.school_name }}</div>
+            <div class="election-title">{{ e.title }}</div>
+          </div>
+          <div class="status-dropdown-wrap">
+            <span class="status-badge status-{{ e.status }}" data-election-id="{{ e.id }}" data-current-status="{{ e.status }}" title="Click to change status" style="cursor:pointer" onclick="openStatusModal({{ e.id }}, '{{ e.status }}')">
+              {% if e.status == 'open' %}🟢 Open{% elif e.status == 'closed' %}🔴 Closed{% else %}⚪ Draft{% endif %}
+            </span>
+          </div>
+        </div>
+
+        <!-- Stats Row -->
+        <div class="card-stats">
+          <div class="mini-stat">
+            <span class="mini-val">{{ stats.position_count }}</span>
+            <span class="mini-lbl">Positions</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-val">{{ stats.candidate_count }}</span>
+            <span class="mini-lbl">Candidates</span>
+          </div>
+          <div class="mini-stat">
+            <span class="mini-val">{{ stats.ballot_count }}</span>
+            <span class="mini-lbl">Votes Cast</span>
+          </div>
+          <div class="mini-stat">
+            {% if e.results_published %}
+              <span class="mini-val" style="color:#22c55e">✅</span>
+            {% else %}
+              <span class="mini-val" style="color:#94a3b8">—</span>
+            {% endif %}
+            <span class="mini-lbl">Results</span>
+          </div>
+        </div>
+
+        <!-- Dates -->
+        {% if e.starts_at or e.ends_at %}
+        <div class="card-dates">
+          {% if e.starts_at %}📅 Opens {{ e.starts_at|date:"d M Y, H:i" }}{% endif %}
+          {% if e.ends_at %} · Closes {{ e.ends_at|date:"d M Y, H:i" }}{% endif %}
+        </div>
+        {% endif %}
+
+        <!-- Kiosk URL -->
+        {% if ed.kiosk_url %}
+        <div class="card-kiosk-url">
+          <span class="url-label">Kiosk URL:</span>
+          <a href="{{ ed.kiosk_url }}" class="url-link" target="_blank">{{ request.get_host }}{{ ed.kiosk_url }}</a>
+          <button class="btn-copy" onclick="copyToClipboard('{{ request.scheme }}://{{ request.get_host }}{{ ed.kiosk_url }}')" title="Copy URL">📋</button>
+        </div>
+        {% endif %}
+
+        <!-- Actions -->
+        <div class="card-actions">
+          <a href="{% url 'portal-positions' e.id %}" class="btn btn-sm btn-secondary">
+            👥 Manage Candidates
+          </a>
+          <a href="{% url 'portal-election-edit' e.id %}" class="btn btn-sm btn-ghost">
+            ✏️ Edit
+          </a>
+          <a href="/results/{{ e.id }}/" target="_blank" class="btn btn-sm btn-ghost">
+            📊 Results
+          </a>
+          <button class="btn btn-sm btn-danger" onclick="confirmDelete({{ e.id }}, '{{ e.title|escapejs }}')">
+            🗑️
+          </button>
+        </div>
+
+      </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
+
+{% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🗳️</div>
+    <h3>No elections yet</h3>
+    <p>Create your first election to get started.</p>
+    <a href="{% url 'portal-election-create' %}" class="btn btn-primary">Create Election</a>
+  </div>
+{% endif %}
+
+<!-- ── Status Modal ── -->
+<div class="modal-backdrop" id="status-modal" style="display:none">
+  <div class="modal-box">
+    <h3 class="modal-title">Change Election Status</h3>
+    <p class="modal-sub">Select the new status for this election.</p>
+    <div class="status-options" id="status-options">
+      <button class="status-option" data-value="draft" onclick="setStatus('draft')">⚪ Draft — not visible to kiosk</button>
+      <button class="status-option" data-value="open"  onclick="setStatus('open')">🟢 Open — kiosk can accept votes</button>
+      <button class="status-option" data-value="closed" onclick="setStatus('closed')">🔴 Closed — voting ended</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="closeStatusModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Delete Confirm Modal ── -->
+<div class="modal-backdrop" id="delete-modal" style="display:none">
+  <div class="modal-box">
+    <h3 class="modal-title">⚠️ Delete Election?</h3>
+    <p class="modal-sub" id="delete-modal-text">This will permanently delete the election and ALL associated data (positions, candidates, votes). This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" onclick="document.getElementById('delete-modal').style.display='none'">Cancel</button>
+      <form id="delete-form" method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Delete Permanently</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let _statusElectionId = null;
+function openStatusModal(id, current) {
+  _statusElectionId = id;
+  document.querySelectorAll('.status-option').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.value === current);
+  });
+  document.getElementById('status-modal').style.display = 'flex';
+}
+function closeStatusModal() { document.getElementById('status-modal').style.display = 'none'; }
+async function setStatus(newStatus) {
+  const res = await fetch(`/portal/elections/${_statusElectionId}/status/`, {
+    method: 'POST', headers: {'Content-Type':'application/json','X-CSRFToken':CSRF_TOKEN},
+    body: JSON.stringify({status: newStatus})
+  });
+  if (res.ok) { showToast('Status updated!'); setTimeout(() => location.reload(), 800); }
+  else { showToast('Failed to update status.', 'error'); }
+  closeStatusModal();
+}
+function confirmDelete(id, title) {
+  document.getElementById('delete-modal-text').textContent =
+    `Delete "${title}"? This removes all positions, candidates, and vote data permanently.`;
+  document.getElementById('delete-form').action = `/portal/elections/${id}/delete/`;
+  document.getElementById('delete-modal').style.display = 'flex';
+}
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(() => showToast('URL copied!'));
+}
+</script>
+{% endblock %}

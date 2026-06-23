@@ -7,8 +7,7 @@ from django.db.models import Count
 from django.http import HttpResponseBadRequest
 from django.http import HttpResponseForbidden
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET
 from django.views.decorators.http import require_POST
@@ -24,12 +23,11 @@ from .rate_limit import throttle_request
 User = get_user_model()
 
 
-def _active_election_or_none():
+def _active_election_or_none(school_slug=None):
 	elections = Election.objects.filter(status=Election.STATUS_OPEN).order_by("-created_at")
-	for election in elections:
-		if election.is_active():
-			return election
-	return None
+	if school_slug:
+		elections = elections.filter(school_slug=school_slug)
+	return elections.first()
 
 
 def _serialize_election(election):
@@ -46,33 +44,57 @@ def _serialize_election(election):
 						"name": candidate.name,
 						"class": candidate.class_name,
 						"motto": candidate.motto,
-						"photo": candidate.photo,
-						"symbol": candidate.symbol,
+						"photo": candidate.photo.name if candidate.photo else "",
+						"symbol": candidate.symbol.name if candidate.symbol else "",
+						"symbol_name": candidate.symbol_name,
 					}
 					for candidate in position.candidates.all().order_by("order", "id")
 				],
 			}
 		)
 
+	# Resolve logo URL: ImageField returns relative path; prefix with /media/
+	logo_url = ""
+	if election.logo:
+		logo_url = f"/media/{election.logo}"
+
 	return {
 		"id": election.id,
 		"title": election.title,
 		"school_name": election.school_name,
+		"school_slug": election.school_slug,
+		"logo_url": logo_url,
 		"positions": positions,
 	}
 
 
 @login_required
 @require_GET
-def kiosk_page(request):
-	election = _active_election_or_none()
-	return render(request, "voting/index.html", {"election": election})
+def kiosk_page(request, school_slug=None):
+	# Enforce school constraints for non-superusers
+	if not request.user.is_superuser:
+		profile = getattr(request.user, "profile", None)
+		if profile and profile.school_slug:
+			if school_slug != profile.school_slug:
+				return redirect("kiosk-school", school_slug=profile.school_slug)
+
+	election = _active_election_or_none(school_slug=school_slug)
+	return render(request, "voting/index.html", {
+		"election": election,
+		"school_slug": school_slug or "",
+	})
 
 
 @login_required
 @require_GET
 def api_current_election(request):
-	election = _active_election_or_none()
+	school_slug = request.GET.get("school") or None
+	if not request.user.is_superuser:
+		profile = getattr(request.user, "profile", None)
+		if profile and profile.school_slug:
+			school_slug = profile.school_slug
+
+	election = _active_election_or_none(school_slug=school_slug)
 	if not election:
 		return JsonResponse({"detail": "No active election."}, status=404)
 	return JsonResponse(_serialize_election(election), status=200)
@@ -92,9 +114,24 @@ def api_start_session(request):
 			status=423,
 		)
 
-	election = _active_election_or_none()
+	# Parse body (optional — may be empty JSON or contain school_slug)
+	try:
+		payload = json.loads(request.body.decode("utf-8")) if request.body else {}
+	except json.JSONDecodeError:
+		payload = {}
+
+	school_slug = payload.get("school_slug") or None
+	if not request.user.is_superuser:
+		profile = getattr(request.user, "profile", None)
+		if profile and profile.school_slug:
+			school_slug = profile.school_slug
+
+	election = _active_election_or_none(school_slug=school_slug)
 	if not election:
 		return JsonResponse({"detail": "Election is not open."}, status=400)
+	if not election.is_active():
+		return JsonResponse({"detail": f"Election is scheduled but not active yet. Starts at: {election.starts_at}"}, status=400)
+
 
 	ballot = Ballot.objects.create(
 		election=election,
@@ -237,11 +274,13 @@ def results_page(request, election_id):
 
 	# Test accounts — their votes are excluded from official results
 	TEST_USERNAMES = ["testuser", "micestest"]
+	exclude_user_ids = UserProfile.objects.filter(exclude_votes=True).values_list("user_id", flat=True)
 
 	# Count only ballots that have actual votes in this election (excludes stale/orphaned ballots)
 	total_submitted = (
 		Vote.objects.filter(position__election=election)
 		.exclude(ballot__started_by__username__in=TEST_USERNAMES)
+		.exclude(ballot__started_by_id__in=exclude_user_ids)
 		.values("ballot_id")
 		.distinct()
 		.count()
@@ -252,6 +291,7 @@ def results_page(request, election_id):
 		vote_counts = (
 			Vote.objects.filter(position=position)
 			.exclude(ballot__started_by__username__in=TEST_USERNAMES)
+			.exclude(ballot__started_by_id__in=exclude_user_ids)
 			.values("candidate_id")
 			.annotate(count=Count("id"))
 		)
@@ -334,6 +374,9 @@ def api_list_invigilators(request):
 			"is_locked": profile.is_locked,
 			"locked_reason": profile.locked_reason,
 			"locked_at": profile.locked_at.isoformat() if profile.locked_at else None,
+			"school_name": profile.school_name,
+			"school_slug": profile.school_slug,
+			"exclude_votes": profile.exclude_votes,
 		})
 
 	return JsonResponse({"users": data}, status=200)

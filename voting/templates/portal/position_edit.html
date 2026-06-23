@@ -1,0 +1,40 @@
+{% extends "portal/base.html" %}
+{% block title %}Edit Position{% endblock %}
+{% block breadcrumb %}
+  <a href="{% url 'portal-home' %}" class="bc-item">Dashboard</a>
+  <span class="bc-sep">›</span>
+  <a href="{% url 'portal-positions' position.election_id %}" class="bc-item">Positions</a>
+  <span class="bc-sep">›</span>
+  <span class="bc-item active">Edit Position</span>
+{% endblock %}
+{% block content %}
+<div class="form-page">
+  <div class="form-card">
+    <div class="form-card-header">
+      <div class="form-card-icon">✏️</div>
+      <div>
+        <h1 class="form-card-title">Edit Position</h1>
+        <p class="form-card-sub">{{ position.election.school_name }} · {{ position.election.title }}</p>
+      </div>
+    </div>
+    <form method="post" class="portal-form">
+      {% csrf_token %}
+      <fieldset class="form-section">
+        <legend class="form-section-title">Position Details</legend>
+        <div class="form-group">
+          <label class="form-label" for="icon">Icon</label>
+          <input type="text" id="icon" name="icon" class="form-input icon-input" value="{{ position.icon }}" maxlength="8" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="name">Position Name <span class="required">*</span></label>
+          <input type="text" id="name" name="name" class="form-input" value="{{ position.name }}" required />
+        </div>
+      </fieldset>
+      <div class="form-actions">
+        <a href="{% url 'portal-positions' position.election_id %}" class="btn btn-ghost">Cancel</a>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
