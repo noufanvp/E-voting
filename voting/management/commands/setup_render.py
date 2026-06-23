@@ -50,24 +50,17 @@ class Command(BaseCommand):
             user.save()
             self.stdout.write("Updated password for user: micestest")
 
-        # Seeding logic: only seed if database contains NO elections at all (meaning it's a completely fresh deploy),
-        # or if FORCE_SEED is explicitly requested. This prevents wiping the database and deleting user-created
-        # elections, positions, and votes on subsequent redeployments.
-        desired_title = "Student Council Election 2026-27"
-        desired_school = "Mices Public School"
-        has_any_election = Election.objects.exists()
+        # Seeding logic: check for Mices and NEMS elections individually.
+        # This allows us to auto-seed NEMS on the next redeploy even if Mices already exists.
+        mices_exists = Election.objects.filter(school_name="Mices Public School").exists()
+        nems_exists = Election.objects.filter(school_name="Narikkuni English Medium School").exists()
+        
         force_seed = os.environ.get("FORCE_SEED", "False") == "True"
 
-        # Check details for the default election only if it exists
-        has_latest = Election.objects.filter(title=desired_title, school_name=desired_school).exists()
-        has_positions = False
+        # Check for legacy formats (only relevant if Mices exists)
         has_legacy_formats = False
-
-        if has_latest:
-            election = Election.objects.get(title=desired_title, school_name=desired_school)
-            has_positions = election.positions.exists()
+        if mices_exists:
             from voting.models import Candidate
-            # Detect if existing data uses old extensions
             has_legacy_formats = (
                 Candidate.objects.filter(photo__endswith='.jpg').exists() or
                 Candidate.objects.filter(photo__endswith='.png').exists() or
@@ -75,18 +68,21 @@ class Command(BaseCommand):
                 Candidate.objects.filter(symbol__endswith='.png').exists()
             )
 
-        # Seeding should run only if forced, if the DB is empty, or if we have the default election in an incomplete/outdated state
-        should_seed = force_seed or (not has_any_election) or (has_latest and (not has_positions or has_legacy_formats))
+        # Seeding command
+        seed_cmd = SeedElectionCommand()
 
-        if should_seed:
-            self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_any_election={has_any_election}, has_positions={has_positions}, has_legacy_formats={has_legacy_formats})...")
-            seed_cmd = SeedElectionCommand()
-            # Seed Mices Public School
+        # Seed Mices if it doesn't exist, has legacy formats, or if forced
+        if force_seed or not mices_exists or has_legacy_formats:
+            self.stdout.write("Mices Public School election not found, has legacy formats, or FORCE_SEED active. Seeding Mices...")
             seed_cmd.handle(title="Student Council Election 2026-27", school="Mices Public School")
-            self.stdout.write(self.style.SUCCESS("Mices Public School election data seeded successfully."))
-            
-            # Seed Narikkuni English Medium School
-            seed_cmd.handle(title="Student Council Election 2026-27", school="Narikkuni English Medium School")
-            self.stdout.write(self.style.SUCCESS("Narikkuni English Medium School election data seeded successfully."))
+            self.stdout.write(self.style.SUCCESS("Mices Public School election seeded successfully."))
         else:
-            self.stdout.write("Elections already exist in the database. Skipping database seeding to preserve user data.")
+            self.stdout.write("Mices Public School election already exists. Skipping Mices seeding.")
+
+        # Seed NEMS if it doesn't exist or if forced
+        if force_seed or not nems_exists:
+            self.stdout.write("Narikkuni English Medium School election not found or FORCE_SEED active. Seeding NEMS...")
+            seed_cmd.handle(title="Student Council Election 2026-27", school="Narikkuni English Medium School")
+            self.stdout.write(self.style.SUCCESS("Narikkuni English Medium School election seeded successfully."))
+        else:
+            self.stdout.write("Narikkuni English Medium School election already exists. Skipping NEMS seeding.")
