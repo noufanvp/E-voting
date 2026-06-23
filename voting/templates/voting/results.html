@@ -892,7 +892,7 @@
     <div class="header-right">
       {% if election and election.logo %}
         <div class="school-logo-wrap">
-          <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="school-logo" />
+          <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
         </div>
       {% endif %}
     </div>
@@ -1033,6 +1033,7 @@
               src="{% if candidate.symbol.name|slice:':7' == 'voting/' %}{% static candidate.symbol.name %}{% else %}{{ candidate.symbol.url }}{% endif %}"
               alt="symbol"
               class="cand-symbol"
+              onerror="this.style.display='none';"
             />
           {% endif %}
 
@@ -1257,7 +1258,7 @@
       <!-- Right side: School Logo (if exists) -->
       {% if election.logo %}
       <div class="print-logo-wrap">
-        <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="print-logo" />
+        <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="print-logo" onerror="this.closest('.print-logo-wrap').style.display='none';" />
       </div>
       {% endif %}
     </div>
@@ -1330,7 +1331,8 @@
                 </td>
                 <td>
                   {% if candidate.symbol %}
-                    <img src="{% if candidate.symbol.name|slice:':7' == 'voting/' %}{% static candidate.symbol.name %}{% else %}{{ candidate.symbol.url }}{% endif %}" alt="" class="print-cand-symbol" />
+                    <img src="{% if candidate.symbol.name|slice:':7' == 'voting/' %}{% static candidate.symbol.name %}{% else %}{{ candidate.symbol.url }}{% endif %}" alt="" class="print-cand-symbol" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" />
+                    <span class="print-muted" style="display:none;">-</span>
                   {% else %}
                     <span class="print-muted">-</span>
                   {% endif %}

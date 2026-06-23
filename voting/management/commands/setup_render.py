@@ -50,11 +50,13 @@ class Command(BaseCommand):
             user.save()
             self.stdout.write("Updated password for user: micestest")
 
-        # Seed election if the correct Mices election or its positions do not exist, or if forced
-        desired_title = "Student Council Election 2026-27"
-        desired_school = "Mices Public School"
+        # Seeding logic: only seed if database contains NO elections at all (meaning it's a completely fresh deploy),
+        # or if FORCE_SEED is explicitly requested. This prevents wiping the database and deleting user-created
+        # elections, positions, and votes on subsequent redeployments.
+        has_any_election = Election.objects.exists()
         force_seed = os.environ.get("FORCE_SEED", "False") == "True"
 
+        # Check details for the default election only if it exists
         has_latest = Election.objects.filter(title=desired_title, school_name=desired_school).exists()
         has_positions = False
         has_legacy_formats = False
@@ -71,11 +73,14 @@ class Command(BaseCommand):
                 Candidate.objects.filter(symbol__endswith='.png').exists()
             )
 
-        if force_seed or not has_latest or not has_positions or has_legacy_formats:
-            self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_latest={has_latest}, has_positions={has_positions}, has_legacy_formats={has_legacy_formats})...")
+        # Seeding should run only if forced, if the DB is empty, or if we have the default election in an incomplete/outdated state
+        should_seed = force_seed or (not has_any_election) or (has_latest and (not has_positions or has_legacy_formats))
+
+        if should_seed:
+            self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_any_election={has_any_election}, has_positions={has_positions}, has_legacy_formats={has_legacy_formats})...")
             seed_cmd = SeedElectionCommand()
             # Call seed command handler directly
             seed_cmd.handle(title=desired_title, school=desired_school)
             self.stdout.write(self.style.SUCCESS("Mices Public School election data seeded successfully."))
         else:
-            self.stdout.write("Mices Public School election data already exists. Skipping database seeding.")
+            self.stdout.write("Elections already exist in the database. Skipping database seeding to preserve user data.")

@@ -45,7 +45,8 @@
         <!-- Card Header -->
         <div class="card-header">
           {% if ed.logo_url %}
-            <img src="{{ ed.logo_url }}" alt="{{ e.school_name }} logo" class="school-logo-thumb" />
+            <img src="{{ ed.logo_url }}" alt="{{ e.school_name }} logo" class="school-logo-thumb" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+            <div class="school-logo-placeholder" style="display:none">🏫</div>
           {% else %}
             <div class="school-logo-placeholder">🏫</div>
           {% endif %}

@@ -135,7 +135,7 @@ async function startSession() {
       if (payload.election.logo_url) {
         rightLogoContainer.innerHTML = `
           <div class="school-logo-wrap">
-            <img src="${payload.election.logo_url}" alt="${payload.election.school_name} Logo" class="school-logo" />
+            <img src="${payload.election.logo_url}" alt="${payload.election.school_name} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
           </div>
         `;
       } else {
@@ -205,7 +205,8 @@ function renderSection(index) {
       const photoSrc = resolveImageUrl(candidate.photo);
       mediaHTML = `
         <div class="candidate-media">
-          <img src="${photoSrc}" alt="${candidate.name}" loading="eager">
+          <img src="${photoSrc}" alt="${candidate.name}" loading="eager" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div class="initials-avatar ${getAvatarColor(candidate.id)}" style="display:none;">${getInitials(candidate.name)}</div>
         </div>
       `;
     } else {
@@ -231,13 +232,13 @@ function renderSection(index) {
           .replace(/\b\w/g, (c) => c.toUpperCase()); // Title Case
       }
       symbolHTML = `
-        <div class="candidate-symbol-wrap">
+        <div class="candidate-symbol-wrap" id="symbol-wrap-${candidate.id}">
           <div class="candidate-symbol-text">
             <span class="symbol-label">Symbol</span>
             <span class="symbol-name">${symbolName}</span>
           </div>
           <div class="candidate-symbol-badge">
-            <img src="${symbolSrc}" alt="${candidate.name} symbol" loading="eager">
+            <img src="${symbolSrc}" alt="${candidate.name} symbol" loading="eager" onerror="document.getElementById('symbol-wrap-${candidate.id}').style.display='none';">
           </div>
         </div>
       `;
@@ -538,7 +539,7 @@ async function loadActiveElection() {
       if (election.logo_url) {
         rightLogoContainer.innerHTML = `
           <div class="school-logo-wrap">
-            <img src="${election.logo_url}" alt="${election.school_name} Logo" class="school-logo" />
+            <img src="${election.logo_url}" alt="${election.school_name} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
           </div>
         `;
       } else {
