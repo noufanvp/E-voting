@@ -160,19 +160,22 @@ class Command(BaseCommand):
             positions.delete()
             existing_election.delete()
 
+        # Select correct seed data and logo
+        school_lower = options["school"].lower()
+        logo_path = ""
+        if "narikkuni" in school_lower or "nems" in school_lower:
+            seed_data = SEED_DATA_NEMS
+            logo_path = "voting/photos/nems.webp"
+        else:
+            seed_data = SEED_DATA_MICES
+
         election = Election.objects.create(
             title=options["title"],
             school_name=options["school"],
             status=Election.STATUS_OPEN,
             starts_at=timezone.now() - timedelta(hours=2),
+            logo=logo_path,
         )
-
-        # Select correct seed data
-        school_lower = options["school"].lower()
-        if "narikkuni" in school_lower or "nems" in school_lower:
-            seed_data = SEED_DATA_NEMS
-        else:
-            seed_data = SEED_DATA_MICES
 
         for p_index, position_data in enumerate(seed_data):
             position = Position.objects.create(

@@ -68,6 +68,14 @@ class Command(BaseCommand):
                 Candidate.objects.filter(symbol__endswith='.png').exists()
             )
 
+        # Check if NEMS has any dynamic uploaded media (does not start with voting/)
+        nems_has_uploads = False
+        if nems_exists:
+            from voting.models import Candidate
+            nems_has_uploads = Candidate.objects.filter(
+                position__election__school_name="Narikkuni English Medium School"
+            ).exclude(photo__startswith="voting/").exists()
+
         # Seeding command
         seed_cmd = SeedElectionCommand()
 
@@ -79,9 +87,9 @@ class Command(BaseCommand):
         else:
             self.stdout.write("Mices Public School election already exists. Skipping Mices seeding.")
 
-        # Seed NEMS if it doesn't exist or if forced
-        if force_seed or not nems_exists:
-            self.stdout.write("Narikkuni English Medium School election not found or FORCE_SEED active. Seeding NEMS...")
+        # Seed NEMS if it doesn't exist, if it contains dynamic media uploads, or if forced
+        if force_seed or not nems_exists or nems_has_uploads:
+            self.stdout.write("Narikkuni English Medium School election not found, has dynamic uploads, or FORCE_SEED active. Seeding NEMS...")
             seed_cmd.handle(title="Student Council Election 2026-27", school="Narikkuni English Medium School")
             self.stdout.write(self.style.SUCCESS("Narikkuni English Medium School election seeded successfully."))
         else:
