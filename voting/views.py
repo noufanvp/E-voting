@@ -276,7 +276,7 @@ def results_page(request, election_id):
 
 	# Count only ballots that have actual votes in this election (excludes stale/orphaned ballots)
 	total_submitted = (
-		Vote.objects.filter(position__election=election)
+		Vote.objects.filter(position__election=election, ballot__status=Ballot.STATUS_SUBMITTED)
 		.exclude(ballot__started_by__username__in=TEST_USERNAMES)
 		.exclude(ballot__started_by_id__in=exclude_user_ids)
 		.values("ballot_id")
@@ -287,7 +287,7 @@ def results_page(request, election_id):
 	positions_data = []
 	for position in election.positions.prefetch_related("candidates").order_by("order", "id"):
 		vote_counts = (
-			Vote.objects.filter(position=position)
+			Vote.objects.filter(position=position, ballot__status=Ballot.STATUS_SUBMITTED)
 			.exclude(ballot__started_by__username__in=TEST_USERNAMES)
 			.exclude(ballot__started_by_id__in=exclude_user_ids)
 			.values("candidate_id")
