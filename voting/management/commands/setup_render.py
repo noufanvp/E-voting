@@ -53,6 +53,8 @@ class Command(BaseCommand):
         # Seeding logic: only seed if database contains NO elections at all (meaning it's a completely fresh deploy),
         # or if FORCE_SEED is explicitly requested. This prevents wiping the database and deleting user-created
         # elections, positions, and votes on subsequent redeployments.
+        desired_title = "Student Council Election 2026-27"
+        desired_school = "Mices Public School"
         has_any_election = Election.objects.exists()
         force_seed = os.environ.get("FORCE_SEED", "False") == "True"
 
