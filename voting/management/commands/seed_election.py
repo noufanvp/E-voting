@@ -6,7 +6,7 @@ from voting.models import Election
 from voting.models import Position
 
 
-SEED_DATA = [
+SEED_DATA_MICES = [
     {
         "position": "HEAD BOY",
         "icon": "👑",
@@ -53,6 +53,41 @@ SEED_DATA = [
             {"name": "Muhammed Yusuf", "class_name": "N/A", "motto": "", "photo": "voting/photos/Muhammed_Yusuf.webp", "symbol": "voting/symbols/symbol_bugle.webp"},
             {"name": "Haya Binth Shahrath", "class_name": "N/A", "motto": "", "photo": "voting/photos/Haya_Binth_Shahrath.webp", "symbol": "voting/symbols/symbol_pencil.webp"},
             {"name": "Dhaheen MP", "class_name": "N/A", "motto": "", "photo": "voting/photos/Dhaheen_MP.webp", "symbol": "voting/symbols/symbol_clock.webp"}            
+        ],
+    }
+]
+
+SEED_DATA_NEMS = [
+    {
+        "position": "HEAD BOY",
+        "icon": "👑",
+        "candidates": [
+            {"name": "Muhammed Safwan", "class_name": "Class 10", "motto": "N/A", "photo": "voting/photos/Muhammed_Safwan.webp", "symbol": "voting/symbols/symbol_nems_computer.webp"},
+            {"name": "Ishan Hafiz", "class_name": "Class 9", "motto": "N/A", "photo": "voting/photos/Ishan_Hafiz.webp", "symbol": "voting/symbols/symbol_nems_pen.webp"},
+        ],
+    },
+    {
+        "position": "HEAD GIRL",
+        "icon": "👑",
+        "candidates": [
+            {"name": "Asiya Jaza K", "class_name": "Class 10", "motto": "N/A", "photo": "voting/photos/Asiya_Jaza_K.webp", "symbol": "voting/symbols/symbol_nems_bag.webp"},
+            {"name": "Avani RS", "class_name": "Class 9", "motto": "N/A", "photo": "voting/photos/Avani_RS.webp", "symbol": "voting/symbols/symbol_nems_book.webp"},
+        ],
+    },
+    {
+        "position": "FINE ARTS",
+        "icon": "🎨",
+        "candidates": [
+            {"name": "Jewel R Joshi", "class_name": "Class 10", "motto": "N/A", "photo": "voting/photos/Jewel_R_Joshi.webp", "symbol": "voting/symbols/symbol_nems_guitar.webp"},
+            {"name": "Azzah Nazmin PP", "class_name": "Class 9", "motto": "N/A", "photo": "voting/photos/Azzah_Nazmin_PP.webp", "symbol": "voting/symbols/symbol_nems_drum.webp"},
+        ],
+    },
+    {
+        "position": "SPORTS CAPTAIN",
+        "icon": "🌟",
+        "candidates": [
+            {"name": "Afeef Rahman", "class_name": "Class 10", "motto": "N/A", "photo": "voting/photos/Afeef_Rahman.webp", "symbol": "voting/symbols/symbol_nems_football.webp"},
+            {"name": "Athif Muhammed", "class_name": "Class 9", "motto": "N/A", "photo": "voting/photos/Athif_Muhammed.webp", "symbol": "voting/symbols/symbol_nems_shuttle.webp"},
         ],
     }
 ]
@@ -110,12 +145,20 @@ class Command(BaseCommand):
             user.save()
             self.stdout.write("Updated password for user: micestest")
 
-        # Clean previous data to ensure a fresh, active seed
+        # Clean previous data for this specific election to avoid global resets
         from datetime import timedelta
-        from voting.models import Vote, Ballot
-        Vote.objects.all().delete()
-        Ballot.objects.all().delete()
-        Election.objects.all().delete()
+        from voting.models import Vote, Ballot, Position, Candidate
+        
+        existing_election = Election.objects.filter(title=options["title"], school_name=options["school"]).first()
+        if existing_election:
+            self.stdout.write(f"Deleting existing election data for '{options['title']}' ({options['school']})...")
+            # Cascade delete positions, candidates, ballots, and votes safely
+            positions = existing_election.positions.all()
+            Vote.objects.filter(position__in=positions).delete()
+            Ballot.objects.filter(election=existing_election).delete()
+            Candidate.objects.filter(position__in=positions).delete()
+            positions.delete()
+            existing_election.delete()
 
         election = Election.objects.create(
             title=options["title"],
@@ -124,7 +167,14 @@ class Command(BaseCommand):
             starts_at=timezone.now() - timedelta(hours=2),
         )
 
-        for p_index, position_data in enumerate(SEED_DATA):
+        # Select correct seed data
+        school_lower = options["school"].lower()
+        if "narikkuni" in school_lower or "nems" in school_lower:
+            seed_data = SEED_DATA_NEMS
+        else:
+            seed_data = SEED_DATA_MICES
+
+        for p_index, position_data in enumerate(seed_data):
             position = Position.objects.create(
                 election=election,
                 name=position_data["position"],
@@ -143,4 +193,4 @@ class Command(BaseCommand):
                     is_nota=candidate_data.get("is_nota", False),
                 )
 
-        self.stdout.write(self.style.SUCCESS(f"Seeded election: {election.title}"))
+        self.stdout.write(self.style.SUCCESS(f"Seeded election: {election.title} for {election.school_name}"))

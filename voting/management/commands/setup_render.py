@@ -81,8 +81,12 @@ class Command(BaseCommand):
         if should_seed:
             self.stdout.write(f"Seeding election data (force_seed={force_seed}, has_any_election={has_any_election}, has_positions={has_positions}, has_legacy_formats={has_legacy_formats})...")
             seed_cmd = SeedElectionCommand()
-            # Call seed command handler directly
-            seed_cmd.handle(title=desired_title, school=desired_school)
+            # Seed Mices Public School
+            seed_cmd.handle(title="Student Council Election 2026-27", school="Mices Public School")
             self.stdout.write(self.style.SUCCESS("Mices Public School election data seeded successfully."))
+            
+            # Seed Narikkuni English Medium School
+            seed_cmd.handle(title="Student Council Election 2026-27", school="Narikkuni English Medium School")
+            self.stdout.write(self.style.SUCCESS("Narikkuni English Medium School election data seeded successfully."))
         else:
             self.stdout.write("Elections already exist in the database. Skipping database seeding to preserve user data.")
