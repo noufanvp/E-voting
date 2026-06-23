@@ -892,7 +892,7 @@
     <div class="header-right">
       {% if election and election.logo %}
         <div class="school-logo-wrap">
-          <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
+          <img src="{{ election.logo_url }}" alt="{{ election.school_name }} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
         </div>
       {% endif %}
     </div>
@@ -1258,7 +1258,7 @@
       <!-- Right side: School Logo (if exists) -->
       {% if election.logo %}
       <div class="print-logo-wrap">
-        <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="print-logo" onerror="this.closest('.print-logo-wrap').style.display='none';" />
+        <img src="{{ election.logo_url }}" alt="{{ election.school_name }} Logo" class="print-logo" onerror="this.closest('.print-logo-wrap').style.display='none';" />
       </div>
       {% endif %}
     </div>

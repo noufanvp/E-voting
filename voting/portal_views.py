@@ -95,7 +95,7 @@ def portal_home(request):
     elections_data = []
     for e in elections:
         stats = _election_stats(e)
-        logo_url = e.logo.url if e.logo else None
+        logo_url = e.logo_url if e.logo else None
         elections_data.append({
             "obj": e,
             "stats": stats,
@@ -204,7 +204,7 @@ def portal_election_edit(request, election_id):
 
         return redirect("portal-home")
 
-    logo_url = election.logo.url if election.logo else None
+    logo_url = election.logo_url if election.logo else None
     return render(request, "portal/election_form.html", {
         "election": election,
         "is_create": False,

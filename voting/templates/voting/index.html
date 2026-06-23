@@ -50,7 +50,7 @@
     <div class="header-right" id="header-right-logo-container">
       {% if election and election.logo %}
         <div class="school-logo-wrap">
-          <img src="{{ election.logo.url }}" alt="{{ election.school_name }} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
+          <img src="{{ election.logo_url }}" alt="{{ election.school_name }} Logo" class="school-logo" onerror="this.closest('.school-logo-wrap').style.display='none';" />
         </div>
       {% endif %}
     </div>

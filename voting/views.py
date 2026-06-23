@@ -53,10 +53,8 @@ def _serialize_election(election):
 			}
 		)
 
-	# Resolve logo URL: ImageField returns relative path; prefix with /media/
-	logo_url = ""
-	if election.logo:
-		logo_url = f"/media/{election.logo}"
+	# Resolve logo URL dynamically using the model property
+	logo_url = election.logo_url
 
 	return {
 		"id": election.id,

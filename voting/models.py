@@ -61,6 +61,17 @@ class Election(models.Model):
 			return False
 		return True
 
+	@property
+	def logo_url(self):
+		if not self.logo:
+			return ""
+		if self.logo.name.startswith("voting/"):
+			return f"/static/{self.logo.name}"
+		try:
+			return self.logo.url
+		except ValueError:
+			return ""
+
 
 class Position(models.Model):
 	election = models.ForeignKey(Election, on_delete=models.CASCADE, related_name="positions")
