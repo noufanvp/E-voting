@@ -52,17 +52,22 @@ def _save_upload(file_obj, folder):
 
 
 def _delete_media(path):
-    """Delete a media-uploaded file (skip if it's a legacy static path)."""
+    """Delete a media-uploaded file (skip if it's a legacy static path).
+    Safe to call with any path format — versioned Cloudinary paths, local paths, or empty values.
+    """
     if not path:
         return
     path_str = getattr(path, "name", str(path))
     if not path_str:
         return
-    if not path_str.startswith("voting/"):
-        try:
-            default_storage.delete(path_str)
-        except Exception:
-            pass
+    # Skip static git-tracked assets — they must never be deleted
+    if path_str.startswith("voting/"):
+        return
+    try:
+        default_storage.delete(path_str)
+    except Exception:
+        # Silently ignore deletion errors — the DB record will still be removed
+        pass
 
 
 def _election_stats(election):
@@ -303,10 +308,13 @@ def portal_position_edit(request, position_id):
 def portal_position_delete(request, position_id):
     position = get_object_or_404(Position, id=position_id)
     election_id = position.election_id
-    # Clean up candidate media files before deletion
-    for candidate in position.candidates.all():
-        _delete_media(candidate.photo)
-        _delete_media(candidate.symbol)
+    # Best-effort cleanup of candidate media files — never block deletion on errors
+    try:
+        for candidate in position.candidates.all():
+            _delete_media(candidate.photo)
+            _delete_media(candidate.symbol)
+    except Exception:
+        pass
     position.delete()
     return redirect("portal-positions", election_id=election_id)
 
