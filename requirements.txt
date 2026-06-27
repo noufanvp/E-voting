@@ -19,3 +19,7 @@ python-dotenv>=1.0.0              # 1.1.1 is installed
 
 # ── Image Processing ────────────────────────────────────────────────────────
 Pillow>=10.0.0                    # Required for ImageField (Election logo) and image validation
+
+# ── Cloud Media Storage ──────────────────────────────────────────────────────
+cloudinary>=1.36.0                # Cloudinary Python SDK
+django-cloudinary-storage>=0.3.0  # Django storage backend for Cloudinary

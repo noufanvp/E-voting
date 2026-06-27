@@ -74,6 +74,8 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.humanize",
     "rest_framework",
+    "cloudinary_storage",  # Must come before django.contrib.staticfiles
+    "cloudinary",
     "voting",
 ]
 
@@ -155,9 +157,32 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATICFILES_DIRS = [BASE_DIR / "voting" / "static"]
 
+# ---------------------------------------------------------------------------
+# Cloudinary — cloud media storage
+# Credentials are injected via environment variables (set on Render dashboard
+# and in local .env). When CLOUDINARY_URL is not set (e.g. local dev without
+# cloud), the app falls back to local FileSystemStorage automatically.
+# ---------------------------------------------------------------------------
+
+CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "")
+
+_use_cloudinary = bool(CLOUDINARY_URL)
+
+if _use_cloudinary:
+    import cloudinary
+    cloudinary.config(
+        cloudinary_url=CLOUDINARY_URL,
+        secure=True,
+    )
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        # Use Cloudinary when CLOUDINARY_URL is set, otherwise local filesystem
+        "BACKEND": (
+            "cloudinary_storage.storage.MediaCloudinaryStorage"
+            if _use_cloudinary
+            else "django.core.files.storage.FileSystemStorage"
+        ),
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",

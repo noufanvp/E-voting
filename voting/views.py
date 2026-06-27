@@ -31,6 +31,23 @@ def _active_election_or_none(school_slug=None):
 
 
 def _serialize_election(election):
+
+	def _resolve_field_url(image_field):
+		"""Return the correct URL for an image field.
+		- Static assets (voting/...) → /static/voting/...
+		- Cloudinary uploads → full https://res.cloudinary.com/... URL
+		- Legacy local uploads → /media/... path
+		"""
+		if not image_field:
+			return ""
+		name = image_field.name or ""
+		if name.startswith("voting/"):
+			return f"/static/{name}"
+		try:
+			return image_field.url  # Returns full Cloudinary URL or local /media/ URL
+		except (ValueError, AttributeError):
+			return ""
+
 	positions = []
 	for position in election.positions.prefetch_related("candidates").all().order_by("order", "id"):
 		positions.append(
@@ -44,8 +61,8 @@ def _serialize_election(election):
 						"name": candidate.name,
 						"class": candidate.class_name,
 						"motto": candidate.motto,
-						"photo": candidate.photo.name if candidate.photo else "",
-						"symbol": candidate.symbol.name if candidate.symbol else "",
+						"photo": _resolve_field_url(candidate.photo),
+						"symbol": _resolve_field_url(candidate.symbol),
 						"symbol_name": candidate.symbol_name,
 					}
 					for candidate in position.candidates.all().order_by("order", "id")
@@ -53,15 +70,12 @@ def _serialize_election(election):
 			}
 		)
 
-	# Resolve logo URL dynamically using the model property
-	logo_url = election.logo_url
-
 	return {
 		"id": election.id,
 		"title": election.title,
 		"school_name": election.school_name,
 		"school_slug": election.school_slug,
-		"logo_url": logo_url,
+		"logo_url": election.logo_url,
 		"positions": positions,
 	}
 
