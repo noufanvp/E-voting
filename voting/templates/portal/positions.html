@@ -100,10 +100,10 @@
             <div class="candidate-row">
               <div class="cand-thumb">
                 {% if c.photo %}
-                  {% if c.photo|slice:":7" == "voting/" %}
-                    <img src="/static/{{ c.photo }}" alt="{{ c.name }}" />
+                  {% if c.photo.name|slice:":7" == "voting/" %}
+                    <img src="/static/{{ c.photo.name }}" alt="{{ c.name }}" />
                   {% else %}
-                    <img src="/media/{{ c.photo }}" alt="{{ c.name }}" />
+                    <img src="{{ c.photo.url }}" alt="{{ c.name }}" />
                   {% endif %}
                 {% else %}
                   <div class="cand-initials">{{ c.name|first|upper }}</div>
@@ -115,10 +115,10 @@
               </div>
               <div class="cand-symbol">
                 {% if c.symbol %}
-                  {% if c.symbol|slice:":7" == "voting/" %}
-                    <img src="/static/{{ c.symbol }}" alt="symbol" class="symbol-thumb" />
+                  {% if c.symbol.name|slice:":7" == "voting/" %}
+                    <img src="/static/{{ c.symbol.name }}" alt="symbol" class="symbol-thumb" />
                   {% else %}
-                    <img src="/media/{{ c.symbol }}" alt="symbol" class="symbol-thumb" />
+                    <img src="{{ c.symbol.url }}" alt="symbol" class="symbol-thumb" />
                   {% endif %}
                 {% endif %}
               </div>
