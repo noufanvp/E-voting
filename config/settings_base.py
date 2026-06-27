@@ -160,24 +160,36 @@ STATICFILES_DIRS = [BASE_DIR / "voting" / "static"]
 # ---------------------------------------------------------------------------
 # Cloudinary — cloud media storage
 # Credentials are injected via environment variables (set on Render dashboard
-# and in local .env). When CLOUDINARY_URL is not set (e.g. local dev without
-# cloud), the app falls back to local FileSystemStorage automatically.
+# and in local .env). When CLOUDINARY_URL is not set or is invalid, the app
+# falls back to local FileSystemStorage automatically without crashing.
 # ---------------------------------------------------------------------------
 
-CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "")
+_raw_cloudinary_url = os.environ.get("CLOUDINARY_URL", "")
 
-_use_cloudinary = bool(CLOUDINARY_URL)
+# Only activate Cloudinary if the URL is a real value (starts with cloudinary://)
+# This prevents crashes if the env var is set to a placeholder or empty string.
+_use_cloudinary = _raw_cloudinary_url.startswith("cloudinary://")
 
 if _use_cloudinary:
-    import cloudinary
-    cloudinary.config(
-        cloudinary_url=CLOUDINARY_URL,
-        secure=True,
-    )
+    try:
+        import cloudinary
+        cloudinary.config(cloudinary_url=_raw_cloudinary_url, secure=True)
+        CLOUDINARY_URL = _raw_cloudinary_url
+    except Exception as e:
+        import warnings
+        warnings.warn(f"Cloudinary config failed ({e}). Falling back to local storage.")
+        _use_cloudinary = False
+else:
+    if _raw_cloudinary_url:
+        import warnings
+        warnings.warn(
+            f"CLOUDINARY_URL does not start with 'cloudinary://' — value looks like a "
+            f"placeholder. Falling back to local file storage."
+        )
 
 STORAGES = {
     "default": {
-        # Use Cloudinary when CLOUDINARY_URL is set, otherwise local filesystem
+        # Use Cloudinary when CLOUDINARY_URL is valid, otherwise local filesystem
         "BACKEND": (
             "cloudinary_storage.storage.MediaCloudinaryStorage"
             if _use_cloudinary
