@@ -36,14 +36,19 @@ def _superuser_required(view_fn):
 
 
 def _save_upload(file_obj, folder):
-    """Save an uploaded file to MEDIA_ROOT/<folder>/ and return the relative path."""
+    """Save an uploaded file and return the storage-assigned name.
+    When Cloudinary is active, the returned name includes the version (e.g. v1782546959/...),
+    which is required to correctly generate Cloudinary delivery URLs later.
+    """
     if not file_obj:
         return None
     ext = os.path.splitext(file_obj.name)[1].lower() or ".bin"
     filename = f"{uuid.uuid4().hex}{ext}"
     rel_path = f"{folder}/{filename}"
-    default_storage.save(rel_path, ContentFile(file_obj.read()))
-    return rel_path
+    # IMPORTANT: use the return value — Cloudinary storage returns a versioned name
+    saved_name = default_storage.save(rel_path, ContentFile(file_obj.read()))
+    return saved_name
+
 
 
 def _delete_media(path):
